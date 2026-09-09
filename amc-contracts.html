@@ -32,6 +32,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null;
 async function main(){const ok=await initPage('amc-contracts','AMC Contracts');if(ok)render();}
 function populateClients(){const sel=document.getElementById('ac-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
@@ -67,7 +68,6 @@ function save(){
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Contract saved!');
 }
 function del(id){if(!confirm('Delete?'))return;SBR.amcContracts=SBR.amcContracts.filter(x=>x.id!==id);saveAllData();render();}
-main();
 </script>
 </body>
 </html>

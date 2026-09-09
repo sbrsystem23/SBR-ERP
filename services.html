@@ -26,6 +26,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null;
 async function main(){const ok=await initPage('services','Services');if(ok)render();}
 function render(){
@@ -60,7 +61,6 @@ function save(){
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Saved!');
 }
 function del(id){if(!confirm('Delete?'))return;SBR.services=SBR.services.filter(x=>x.id!==id);saveAllData();render();}
-main();
 </script>
 </body>
 </html>

@@ -22,6 +22,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 async function main(){
   const ok=await initPage('cover-letter','Cover Letter');
   if(!ok)return;
@@ -34,7 +35,6 @@ function save(){
   SBR.coverLetter={salutation:gv('cl-salutation'),openline:gv('cl-openline'),greeting:gv('cl-greeting'),about:gv('cl-about'),certs:gv('cl-certs'),closing:gv('cl-closing'),sigName:gv('cl-sig-name'),sigTitle:gv('cl-sig-title')};
   saveAllData();showToast('✅ Cover letter saved!');
 }
-main();
 </script>
 </body>
 </html>

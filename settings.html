@@ -90,6 +90,7 @@
 
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 async function main() {
   const ok = await initPage('settings','Settings & Categories');
   if (ok) { loadCompany(); renderCategories(); renderKeyTerms(); }
@@ -198,7 +199,6 @@ function saveKeyTerms() {
   saveAllData(); renderKeyTerms(); showToast('✅ Key Terms saved!');
 }
 
-main();
 </script>
 </body>
 </html>

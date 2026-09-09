@@ -74,6 +74,7 @@
 
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId = null;
 
 async function main() {
@@ -192,7 +193,6 @@ function deleteClientById(id) {
   showToast('Client deleted');
 }
 
-main();
 </script>
 </body>
 </html>

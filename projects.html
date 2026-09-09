@@ -48,6 +48,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null;
 async function main(){const ok=await initPage('projects','Projects');if(ok)render();}
 function populateClients(){const sel=document.getElementById('pj-client');const cur=sel.value;sel.innerHTML='<option value="">— Select Client —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
@@ -94,7 +95,6 @@ function save(){
   else SBR.projects.push({id:SBR.projIdCtr++,...obj});
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Project saved!');
 }
-main();
 </script>
 </body>
 </html>

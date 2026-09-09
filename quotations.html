@@ -45,6 +45,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null,qtSystems=[];
 async function main(){const ok=await initPage('quotations','Quotations');if(ok)render();}
 function populateClients(){const sel=document.getElementById('qf-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
@@ -109,7 +110,6 @@ function save(){
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Quotation saved!');
 }
 function del(id){if(!confirm('Delete?'))return;SBR.savedQuotations=SBR.savedQuotations.filter(x=>x.id!==id);saveAllData();render();}
-main();
 </script>
 </body>
 </html>

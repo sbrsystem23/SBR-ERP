@@ -47,6 +47,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null;
 async function main(){const ok=await initPage('amc','AMC Quotations');if(ok)render();}
 function populateClients(){const sel=document.getElementById('af-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
@@ -81,7 +82,6 @@ function save(){
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ AMC Quotation saved!');
 }
 function del(id){if(!confirm('Delete?'))return;SBR.amcQuotations=SBR.amcQuotations.filter(x=>x.id!==id);saveAllData();render();}
-main();
 </script>
 </body>
 </html>

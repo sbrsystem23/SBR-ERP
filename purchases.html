@@ -46,6 +46,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editId=null,lpoItems=[];
 async function main(){const ok=await initPage('purchases','Purchase Orders');if(ok)render();}
 function populateSuppliers(){const sel=document.getElementById('lf-supplier');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.suppliers.map(s=>`<option value="${s.id}">${escH(s.name)}</option>`).join('');if(cur)sel.value=cur;}
@@ -89,7 +90,6 @@ function save(){
   saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ LPO saved!');
 }
 function del(id){if(!confirm('Delete?'))return;SBR.lpos=SBR.lpos.filter(x=>x.id!==id);saveAllData();render();}
-main();
 </script>
 </body>
 </html>

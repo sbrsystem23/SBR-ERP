@@ -91,9 +91,15 @@
 
 <script src="shared.js"></script>
 <script>
+window.addEventListener('load', function() { main(); });
 async function main() {
-  const ok = await initPage('dashboard', 'Dashboard');
-  if (ok) renderDash();
+  try {
+    const ok = await initPage('dashboard', 'Dashboard');
+    if (ok) renderDash();
+  } catch(e) {
+    console.error('Dashboard error:', e);
+    document.getElementById('dash-stats').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
+  }
 }
 
 function renderDash() {
@@ -108,6 +114,7 @@ function renderDash() {
 }
 
 function renderStats() {
+  if (!window.SBR) return;
   const D = SBR;
   let paid=0, pending=0, overdue=0;
   D.invoices.forEach(inv => {

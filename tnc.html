@@ -17,6 +17,7 @@
 </div>
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 async function main(){const ok=await initPage('tnc','Terms & Conditions');if(ok)renderTnc();}
 function renderTnc(){
   const el=document.getElementById('tnc-list');
@@ -31,7 +32,6 @@ function save(){
   SBR.SBR_TNC=(SBR.SBR_TNC||[]).map((t,i)=>gv('tnc-'+i)||t).filter(t=>t.trim());
   saveAllData();renderTnc();showToast('✅ Terms & Conditions saved!');
 }
-main();
 </script>
 </body>
 </html>

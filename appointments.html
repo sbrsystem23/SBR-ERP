@@ -60,6 +60,7 @@
 
 <script src="shared.js"></script>
 <script>
+window.addEventListener("load",function(){main();});
 let editApptId = null;
 
 async function main() {
@@ -137,7 +138,6 @@ function deleteAppt(id) {
   saveAllData(); renderAppts(); showToast('Deleted');
 }
 
-main();
 </script>
 </body>
 </html>
