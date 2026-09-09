@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Purchase Orders</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">🛒 Purchase Orders (LPO)</div><button class="btn btn-p" onclick="openForm()">+ New LPO</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search LPOs..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:150px"><option value="">All Status</option><option>Draft</option><option>Sent</option><option>Received</option><option>Cancelled</option></select>
+  </div>
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New LPO</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">LPO No.</label><input class="fi" id="lf-num"></div>
+      <div class="field"><label class="flbl">Date</label><input class="fi" id="lf-date" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Supplier *</label><select class="fi" id="lf-supplier"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="lf-status"><option>Draft</option><option>Sent</option><option>Received</option><option>Cancelled</option></select></div>
+    </div>
+    <div class="card-title" style="margin:10px 0 6px">📋 Items</div>
+    <div style="font-size:9px;color:var(--text2);display:grid;grid-template-columns:1fr 70px 90px 70px auto;gap:6px;padding:0 2px;margin-bottom:4px;text-transform:uppercase;font-weight:700">
+      <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Unit Cost</span><span style="text-align:center">VAT%</span><span></span>
+    </div>
+    <div id="lpo-items"></div>
+    <button class="btn btn-sm" onclick="addItem()" style="margin:6px 0">+ Add Item</button>
+    <div style="border-top:.5px solid var(--border);margin-top:10px;padding-top:10px">
+      <div style="display:flex;justify-content:flex-end">
+        <div style="width:260px">
+          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--text2)">Subtotal</span><span id="lpo-sub">AED 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--text2)">VAT</span><span id="lpo-vat">AED 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:800;color:var(--blue);border-top:.5px solid var(--border);margin-top:4px"><span>TOTAL</span><span id="lpo-total">AED 0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="lf-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save LPO</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null,lpoItems=[];
+async function main(){const ok=await initPage('purchases','Purchase Orders');if(ok)render();}
+function populateSuppliers(){const sel=document.getElementById('lf-supplier');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.suppliers.map(s=>`<option value="${s.id}">${escH(s.name)}</option>`).join('');if(cur)sel.value=cur;}
+function calcTotal(){let sub=0,vat=0;lpoItems.forEach(it=>{const n=(it.qty||0)*(it.cost||0);sub+=n;vat+=n*(it.vat||0)/100;});document.getElementById('lpo-sub').textContent='AED '+fmt(sub);document.getElementById('lpo-vat').textContent='AED '+fmt(vat);document.getElementById('lpo-total').textContent='AED '+fmt(sub+vat);return{sub,vat,total:sub+vat};}
+function addItem(){lpoItems.push({desc:'',qty:1,cost:0,vat:5});renderItems();}
+function renderItems(){
+  document.getElementById('lpo-items').innerHTML=lpoItems.map((it,i)=>`<div style="display:grid;grid-template-columns:1fr 70px 90px 70px auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input class="fi" value="${escH(it.desc)}" placeholder="Item description" oninput="lpoItems[${i}].desc=this.value">
+    <input class="fi" type="number" value="${it.qty}" min="0" oninput="lpoItems[${i}].qty=parseFloat(this.value)||0;calcTotal()" style="text-align:center">
+    <input class="fi" type="number" value="${it.cost}" min="0" step="0.01" oninput="lpoItems[${i}].cost=parseFloat(this.value)||0;calcTotal()" style="text-align:right">
+    <input class="fi" type="number" value="${it.vat}" min="0" oninput="lpoItems[${i}].vat=parseFloat(this.value)||0;calcTotal()" style="text-align:center">
+    <button class="btn btn-xs btn-r" onclick="lpoItems.splice(${i},1);renderItems();calcTotal()">✕</button>
+  </div>`).join('');calcTotal();
+}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();const sf=document.getElementById('status-filter').value;
+  const list=SBR.lpos.filter(l=>(!q||(l.num||'').toLowerCase().includes(q))&&(!sf||l.status===sf)).sort((a,b)=>b.id-a.id);
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛒</div><div class="empty-state-text">No purchase orders yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>LPO No.</th><th>Supplier</th><th>Date</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(l=>{const s=SBR.suppliers.find(x=>x.id===l.supplierId)||{name:'—'};const t=l.total||0;return`<tr onclick="openForm(${l.id})" style="cursor:pointer">
+    <td style="font-weight:600">${escH(l.num||'—')}</td><td>${escH(s.name)}</td><td>${formatDate(l.date)}</td>
+    <td style="font-weight:700;color:var(--blue)">AED ${fmt(t)}</td><td>${badgeHTML(l.status)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${l.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${l.id})">✕</button>
+    </div></td>
+  </tr>`;}).join('')+'</tbody></table>';
+}
+function openForm(id){
+  editId=id||null;populateSuppliers();
+  const num='LPO-2026-0'+SBR.lpoIdCtr;
+  if(id){const l=SBR.lpos.find(x=>x.id===id);if(!l)return;document.getElementById('modal-title').textContent='✏️ Edit LPO';sv('lf-num',l.num);sv('lf-date',l.date);sv('lf-supplier',l.supplierId||'');sv('lf-status',l.status||'Draft');sv('lf-notes',l.notes||'');lpoItems=(l.items||[]).map(x=>({...x}));}
+  else{document.getElementById('modal-title').textContent='+ New LPO';sv('lf-num',num);sv('lf-date',td());sv('lf-supplier','');sv('lf-status','Draft');sv('lf-notes','');lpoItems=[{desc:'',qty:1,cost:0,vat:5}];}
+  renderItems();document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const t=calcTotal();const obj={num:gv('lf-num')||'LPO-2026-0'+SBR.lpoIdCtr,date:gv('lf-date'),supplierId:parseInt(gv('lf-supplier'))||null,status:gv('lf-status'),notes:gv('lf-notes'),items:lpoItems,total:t.total};
+  if(editId){const l=SBR.lpos.find(x=>x.id===editId);if(l)Object.assign(l,obj);}
+  else SBR.lpos.push({id:SBR.lpoIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ LPO saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.lpos=SBR.lpos.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

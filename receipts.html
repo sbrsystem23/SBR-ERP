@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Receipts</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">💰 Payment Receipts</div><button class="btn btn-p" onclick="openForm()">+ New Receipt</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search receipts..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:150px"><option value="">All Status</option><option>Received</option><option>Pending</option><option>Cancelled</option></select>
+  </div>
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New Receipt</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Receipt No.</label><input class="fi" id="rf-num"></div>
+      <div class="field"><label class="flbl">Date</label><input class="fi" id="rf-date" type="date"></div>
+    </div>
+    <div class="field"><label class="flbl">Client *</label><select class="fi" id="rf-client"><option value="">— Select —</option></select></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Amount (AED) *</label><input class="fi" id="rf-amount" type="number" min="0" step="0.01"></div>
+      <div class="field"><label class="flbl">Payment Method</label><select class="fi" id="rf-method"><option>Bank Transfer</option><option>Cheque</option><option>Cash</option><option>Credit Card</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Reference / Cheque No.</label><input class="fi" id="rf-ref"></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="rf-status"><option>Received</option><option>Pending</option><option>Cancelled</option></select></div>
+    </div>
+    <div class="field"><label class="flbl">Description</label><input class="fi" id="rf-desc" placeholder="Payment for..."></div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="rf-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null;
+async function main(){const ok=await initPage('receipts','Receipts');if(ok)render();}
+function populateClients(){const sel=document.getElementById('rf-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const sf=document.getElementById('status-filter').value;
+  const list=SBR.receipts.filter(r=>(!q||(r.num||'').toLowerCase().includes(q)||(r.desc||'').toLowerCase().includes(q))&&(!sf||r.status===sf)).sort((a,b)=>b.id-a.id);
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💰</div><div class="empty-state-text">No receipts yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Receipt No.</th><th>Client</th><th>Date</th><th>Amount</th><th>Method</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(r=>{const c=SBR.clients.find(x=>x.id===r.clientId)||{name:'—'};return`<tr onclick="openForm(${r.id})" style="cursor:pointer">
+    <td style="font-weight:600">${escH(r.num||'—')}</td>
+    <td>${escH(c.name)}</td>
+    <td>${formatDate(r.date)}</td>
+    <td style="font-weight:700;color:var(--green)">AED ${fmt(r.amount)}</td>
+    <td style="font-size:11px">${escH(r.method||'—')}</td>
+    <td>${badgeHTML(r.status)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${r.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${r.id})">✕</button>
+    </div></td>
+  </tr>`;}).join('')+'</tbody></table>';
+}
+function openForm(id){
+  editId=id||null;populateClients();
+  const num='REC-2026-0'+SBR.recIdCtr;
+  if(id){const r=SBR.receipts.find(x=>x.id===id);if(!r)return;document.getElementById('modal-title').textContent='✏️ Edit Receipt';sv('rf-num',r.num);sv('rf-date',r.date);sv('rf-client',r.clientId||'');sv('rf-amount',r.amount);sv('rf-method',r.method||'Bank Transfer');sv('rf-ref',r.ref||'');sv('rf-status',r.status||'Received');sv('rf-desc',r.desc||'');sv('rf-notes',r.notes||'');}
+  else{document.getElementById('modal-title').textContent='+ New Receipt';sv('rf-num',num);sv('rf-date',td());sv('rf-client','');sv('rf-amount','');sv('rf-method','Bank Transfer');sv('rf-ref','');sv('rf-status','Received');sv('rf-desc','');sv('rf-notes','');}
+  document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const amount=parseFloat(gv('rf-amount'));if(!amount){showToast('Amount required','error');return;}
+  const obj={num:gv('rf-num')||'REC-2026-0'+SBR.recIdCtr,date:gv('rf-date'),clientId:parseInt(gv('rf-client'))||null,amount,method:gv('rf-method'),ref:gv('rf-ref'),status:gv('rf-status'),desc:gv('rf-desc'),notes:gv('rf-notes')};
+  if(editId){const r=SBR.receipts.find(x=>x.id===editId);if(r)Object.assign(r,obj);}
+  else{SBR.receipts.push({id:SBR.recIdCtr++,...obj});}
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Receipt saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.receipts=SBR.receipts.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

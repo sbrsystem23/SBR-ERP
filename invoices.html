@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Invoices</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">🧾 Invoices</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="openForm('PI')">+ New PI</button>
+      <button class="btn btn-p" onclick="openForm('TAX')" style="background:#0891b2;border-color:#0891b2">+ Tax Invoice</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search invoices..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="type-filter" onchange="render()" style="max-width:150px"><option value="">All Types</option><option value="PI">Proforma (PI)</option><option value="TAX">Tax Invoice</option></select>
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:150px"><option value="">All Status</option><option>Draft</option><option>Sent</option><option>Paid</option><option>Overdue</option><option>Cancelled</option></select>
+  </div>
+  <div id="list" class="list-wrap"></div>
+</div>
+
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New Proforma Invoice</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <input type="hidden" id="inv-type" value="PI">
+    <div class="fg2">
+      <div class="field"><label class="flbl">Invoice No.</label><input class="fi" id="inv-num"></div>
+      <div class="field"><label class="flbl">Date</label><input class="fi" id="inv-date" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client *</label><select class="fi" id="inv-client"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="inv-status"><option>Draft</option><option>Sent</option><option>Paid</option><option>Overdue</option><option>Cancelled</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Payment Terms</label><input class="fi" id="inv-terms" placeholder="e.g. 100% Advance"></div>
+      <div class="field"><label class="flbl">Project Ref</label><input class="fi" id="inv-projref"></div>
+    </div>
+    <div class="card-title" style="margin:10px 0 6px">📋 Line Items</div>
+    <div style="font-size:9px;color:var(--text2);display:grid;grid-template-columns:1fr 70px 90px 70px auto;gap:6px;padding:0 2px;margin-bottom:4px;text-transform:uppercase;font-weight:700">
+      <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Unit Price</span><span style="text-align:center">VAT%</span><span></span>
+    </div>
+    <div id="inv-items"></div>
+    <button class="btn btn-sm" onclick="addInvItem()" style="margin:6px 0">+ Add Line</button>
+    <div style="border-top:.5px solid var(--border);margin-top:10px;padding-top:10px">
+      <div style="display:flex;justify-content:flex-end">
+        <div style="width:260px">
+          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--text2)">Subtotal (excl. VAT)</span><span id="inv-sub">AED 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--text2)">VAT</span><span id="inv-vat">AED 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:800;color:var(--blue);border-top:.5px solid var(--border);margin-top:4px"><span>TOTAL</span><span id="inv-total">AED 0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="inv-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save Invoice</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null,invItems=[];
+async function main(){const ok=await initPage('invoices','Invoices');if(ok)render();}
+function populateClients(){const sel=document.getElementById('inv-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function calcTotal(){
+  let sub=0,vat=0;
+  invItems.forEach(it=>{const n=(it.qty||0)*(it.price||0);sub+=n;vat+=n*(it.vat||0)/100;});
+  document.getElementById('inv-sub').textContent='AED '+fmt(sub);
+  document.getElementById('inv-vat').textContent='AED '+fmt(vat);
+  document.getElementById('inv-total').textContent='AED '+fmt(sub+vat);
+  return{sub,vat,total:sub+vat};
+}
+function addInvItem(){invItems.push({desc:'',qty:1,price:0,vat:5});renderInvItems();}
+function renderInvItems(){
+  document.getElementById('inv-items').innerHTML=invItems.map((it,i)=>`<div style="display:grid;grid-template-columns:1fr 70px 90px 70px auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input class="fi" value="${escH(it.desc)}" placeholder="Description" oninput="invItems[${i}].desc=this.value">
+    <input class="fi" type="number" value="${it.qty}" min="0" oninput="invItems[${i}].qty=parseFloat(this.value)||0;calcTotal()" style="text-align:center">
+    <input class="fi" type="number" value="${it.price}" min="0" step="0.01" oninput="invItems[${i}].price=parseFloat(this.value)||0;calcTotal()" style="text-align:right">
+    <input class="fi" type="number" value="${it.vat}" min="0" max="100" oninput="invItems[${i}].vat=parseFloat(this.value)||0;calcTotal()" style="text-align:center">
+    <button class="btn btn-xs btn-r" onclick="invItems.splice(${i},1);renderInvItems();calcTotal()">✕</button>
+  </div>`).join('');
+  calcTotal();
+}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const tf=document.getElementById('type-filter').value;
+  const sf=document.getElementById('status-filter').value;
+  const list=SBR.invoices.filter(i=>(!q||(i.num||'').toLowerCase().includes(q))&&(!tf||i.invType===tf)&&(!sf||i.status===sf)).sort((a,b)=>b.id-a.id);
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🧾</div><div class="empty-state-text">No invoices yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Invoice No.</th><th>Type</th><th>Client</th><th>Date</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(inv=>{
+    const c=SBR.clients.find(x=>x.id===inv.clientId)||{name:'—'};
+    const t=(inv.items||[]).reduce((s,it)=>{const n=(it.qty||0)*(it.price||0);return s+n+n*(it.vat||0)/100;},0);
+    const typeColor=inv.invType==='PI'?'#7c3aed':'#0891b2';
+    return`<tr onclick="openForm(null,${inv.id})" style="cursor:pointer">
+      <td style="font-weight:600">${escH(inv.num||'—')}</td>
+      <td><span style="background:${typeColor}22;color:${typeColor};padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700">${inv.invType||'PI'}</span></td>
+      <td>${escH(c.name)}</td>
+      <td>${formatDate(inv.date)}</td>
+      <td style="font-weight:700;color:var(--blue)">AED ${fmt(t)}</td>
+      <td>${badgeHTML(inv.status)}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(null,${inv.id})">✏️</button>
+        <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${inv.id})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('')+'</tbody></table>';
+}
+function openForm(type,id){
+  editId=id||null;populateClients();
+  const invType=type||'PI';
+  if(id){const inv=SBR.invoices.find(x=>x.id===id);if(!inv)return;document.getElementById('modal-title').textContent='✏️ Edit Invoice';document.getElementById('inv-type').value=inv.invType||'PI';sv('inv-num',inv.num);sv('inv-date',inv.date);sv('inv-client',inv.clientId||'');sv('inv-status',inv.status||'Draft');sv('inv-terms',inv.terms||'');sv('inv-projref',inv.projectRef||'');sv('inv-notes',inv.notes||'');invItems=(inv.items||[]).map(x=>({...x}));}
+  else{const num=(invType==='PI'?'PI':'INV')+'-2026-0'+SBR.iIdCtr;document.getElementById('modal-title').textContent='+ New '+(invType==='PI'?'Proforma Invoice':'Tax Invoice');document.getElementById('inv-type').value=invType;sv('inv-num',num);sv('inv-date',td());sv('inv-client','');sv('inv-status','Draft');sv('inv-terms','');sv('inv-projref','');sv('inv-notes','');invItems=[{desc:'',qty:1,price:0,vat:5}];}
+  renderInvItems();document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const t=calcTotal();
+  const obj={num:gv('inv-num'),date:gv('inv-date'),invType:document.getElementById('inv-type').value,clientId:parseInt(gv('inv-client'))||null,status:gv('inv-status'),terms:gv('inv-terms'),projectRef:gv('inv-projref'),notes:gv('inv-notes'),items:invItems,total:t.total};
+  if(editId){const inv=SBR.invoices.find(x=>x.id===editId);if(inv)Object.assign(inv,obj);}
+  else SBR.invoices.push({id:SBR.iIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Invoice saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.invoices=SBR.invoices.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Delivery Notes</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">📦 Delivery Notes</div><button class="btn btn-p" onclick="openForm()">+ New Delivery Note</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search delivery notes..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:150px"><option value="">All Status</option><option>Draft</option><option>Delivered</option><option>Partial</option><option>Returned</option></select>
+  </div>
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New Delivery Note</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">DN No.</label><input class="fi" id="df-num"></div>
+      <div class="field"><label class="flbl">Date</label><input class="fi" id="df-date" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client *</label><select class="fi" id="df-client"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="df-status"><option>Draft</option><option>Delivered</option><option>Partial</option><option>Returned</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Delivery Address</label><input class="fi" id="df-addr"></div>
+      <div class="field"><label class="flbl">Delivery Method</label><input class="fi" id="df-method"></div>
+    </div>
+    <div class="card-title" style="margin:10px 0 6px">📦 Items</div>
+    <div id="dn-items"></div>
+    <button class="btn btn-sm" onclick="addItem()" style="margin-bottom:10px">+ Add Item</button>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="df-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null,dnItems=[];
+async function main(){const ok=await initPage('delivery','Delivery Notes');if(ok)render();}
+function populateClients(){const sel=document.getElementById('df-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const sf=document.getElementById('status-filter').value;
+  const list=SBR.deliveryNotes.filter(d=>(!q||(d.num||'').toLowerCase().includes(q))&&(!sf||d.status===sf)).sort((a,b)=>b.id-a.id);
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No delivery notes yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>DN No.</th><th>Client</th><th>Date</th><th>Items</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(d=>{const c=SBR.clients.find(x=>x.id===d.clientId)||{name:'—'};return`<tr onclick="openForm(${d.id})" style="cursor:pointer">
+    <td style="font-weight:600">${escH(d.num||'—')}</td>
+    <td>${escH(c.name)}</td>
+    <td>${formatDate(d.date)}</td>
+    <td>${(d.items||[]).length} items</td>
+    <td>${badgeHTML(d.status)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${d.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${d.id})">✕</button>
+    </div></td>
+  </tr>`;}).join('')+'</tbody></table>';
+}
+function addItem(){dnItems.push({desc:'',qty:1,ordered:1});renderItems();}
+function renderItems(){
+  document.getElementById('dn-items').innerHTML=dnItems.map((it,i)=>`<div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input class="fi" value="${escH(it.desc)}" placeholder="Item description" oninput="dnItems[${i}].desc=this.value">
+    <input class="fi" type="number" value="${it.qty}" min="0" placeholder="Qty" oninput="dnItems[${i}].qty=parseFloat(this.value)||0" style="text-align:center">
+    <input class="fi" type="number" value="${it.ordered}" min="0" placeholder="Ordered" oninput="dnItems[${i}].ordered=parseFloat(this.value)||0" style="text-align:center">
+    <button class="btn btn-xs btn-r" onclick="dnItems.splice(${i},1);renderItems()">✕</button>
+  </div>`).join('');
+}
+function openForm(id){
+  editId=id||null;populateClients();
+  const num='DN-2026-0'+SBR.dIdCtr;
+  if(id){const d=SBR.deliveryNotes.find(x=>x.id===id);if(!d)return;document.getElementById('modal-title').textContent='✏️ Edit Delivery Note';sv('df-num',d.num);sv('df-date',d.date);sv('df-client',d.clientId||'');sv('df-status',d.status||'Draft');sv('df-addr',d.addr||'');sv('df-method',d.method||'');sv('df-notes',d.notes||'');dnItems=(d.items||[]).map(x=>({...x}));}
+  else{document.getElementById('modal-title').textContent='+ New Delivery Note';sv('df-num',num);sv('df-date',td());sv('df-client','');sv('df-status','Draft');sv('df-addr','');sv('df-method','');sv('df-notes','');dnItems=[{desc:'',qty:1,ordered:1}];}
+  renderItems();document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const obj={num:gv('df-num')||'DN-2026-0'+SBR.dIdCtr,date:gv('df-date'),clientId:parseInt(gv('df-client'))||null,status:gv('df-status'),addr:gv('df-addr'),method:gv('df-method'),notes:gv('df-notes'),items:dnItems.filter(i=>i.desc.trim())};
+  if(editId){const d=SBR.deliveryNotes.find(x=>x.id===editId);if(d)Object.assign(d,obj);}
+  else SBR.deliveryNotes.push({id:SBR.dIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.deliveryNotes=SBR.deliveryNotes.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

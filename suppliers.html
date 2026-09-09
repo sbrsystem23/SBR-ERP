@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Suppliers</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr">
+    <div class="page-title">🏭 Suppliers</div>
+    <button class="btn btn-p" onclick="openForm()">+ Add Supplier</button>
+  </div>
+  <input class="search-bar" id="search" placeholder="Search suppliers..." oninput="render()" style="max-width:320px;margin-bottom:16px">
+  <div id="list" class="list-wrap"></div>
+</div>
+
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">+ Add Supplier</div>
+      <button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Supplier Name *</label><input class="fi" id="sf-name"></div>
+      <div class="field"><label class="flbl">Contact Person</label><input class="fi" id="sf-contact"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Phone</label><input class="fi" id="sf-phone"></div>
+      <div class="field"><label class="flbl">Email</label><input class="fi" id="sf-email"></div>
+    </div>
+    <div class="field"><label class="flbl">Address</label><input class="fi" id="sf-addr"></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">TRN</label><input class="fi" id="sf-trn"></div>
+      <div class="field"><label class="flbl">Payment Terms</label><input class="fi" id="sf-terms" placeholder="e.g. Net 30"></div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="sf-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let editId = null;
+async function main() { const ok = await initPage('suppliers','Suppliers'); if(ok) render(); }
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const list = SBR.suppliers.filter(s => !q || s.name.toLowerCase().includes(q) || (s.contact||'').toLowerCase().includes(q));
+  const el = document.getElementById('list');
+  if (!list.length) { el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏭</div><div class="empty-state-text">No suppliers yet.</div></div>'; return; }
+  el.innerHTML = list.map(s => `<div class="list-item" onclick="openForm(${s.id})">
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--blue)">${escH(s.name)}</div>
+      <div style="font-size:11px;color:var(--text2)">${s.contact?'👤 '+escH(s.contact)+' · ':''}${s.phone?'📞 '+escH(s.phone):''}</div>
+      ${s.email?`<div style="font-size:10px;color:var(--text3)">✉️ ${escH(s.email)}</div>`:''}
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${s.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${s.id})">✕</button>
+    </div>
+  </div>`).join('');
+}
+
+function openForm(id) {
+  editId = id||null;
+  if (id) { const s=SBR.suppliers.find(x=>x.id===id); if(!s)return; document.getElementById('modal-title').textContent='✏️ Edit Supplier'; sv('sf-name',s.name);sv('sf-contact',s.contact||'');sv('sf-phone',s.phone||'');sv('sf-email',s.email||'');sv('sf-addr',s.addr||'');sv('sf-trn',s.trn||'');sv('sf-terms',s.terms||'');sv('sf-notes',s.notes||''); }
+  else { document.getElementById('modal-title').textContent='+ Add Supplier'; ['sf-name','sf-contact','sf-phone','sf-email','sf-addr','sf-trn','sf-terms','sf-notes'].forEach(i=>sv(i,'')); }
+  document.getElementById('modal').style.display='flex';
+}
+
+function save() {
+  const name=gv('sf-name').trim(); if(!name){showToast('Name required','error');return;}
+  const obj={name,contact:gv('sf-contact'),phone:gv('sf-phone'),email:gv('sf-email'),addr:gv('sf-addr'),trn:gv('sf-trn'),terms:gv('sf-terms'),notes:gv('sf-notes')};
+  if(editId){const s=SBR.suppliers.find(x=>x.id===editId);if(s)Object.assign(s,obj);}
+  else SBR.suppliers.push({id:SBR.supplierIdCtr++,...obj});
+  saveAllData(); document.getElementById('modal').style.display='none'; render(); showToast('✅ Saved!');
+}
+
+function del(id) { if(!confirm('Delete?'))return; SBR.suppliers=SBR.suppliers.filter(x=>x.id!==id); saveAllData();render(); }
+main();
+</script>
+</body>
+</html>

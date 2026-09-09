@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Dashboard</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.stat-card{background:#fff;border-radius:10px;border:.5px solid var(--border);padding:14px 16px;cursor:pointer;transition:transform .1s,box-shadow .1s;position:relative;overflow:hidden}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.stat-card::before{content:attr(data-icon);position:absolute;right:12px;top:10px;font-size:28px;opacity:.15}
+.stat-card .stat-val{font-size:22px;font-weight:800;margin:4px 0 2px}
+.stat-card .stat-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.stat-card .stat-sub{font-size:10px;color:var(--text2);margin-top:2px}
+.sc-green .stat-val{color:#16a34a} .sc-green{border-left:3px solid #16a34a}
+.sc-amber .stat-val{color:#d97706} .sc-amber{border-left:3px solid #d97706}
+.sc-red   .stat-val{color:#dc2626} .sc-red{border-left:3px solid #dc2626}
+.sc-blue  .stat-val{color:#0F4C81} .sc-blue{border-left:3px solid #0F4C81}
+.sc-purple .stat-val{color:#7c3aed} .sc-purple{border-left:3px solid #7c3aed}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.panel{background:#fff;border-radius:10px;border:.5px solid var(--border);overflow:hidden}
+.panel-hdr{padding:12px 14px;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--blue)}
+.panel-body{padding:4px 0}
+.aitem{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.aitem:hover{background:var(--surface)}
+.aitem:last-child{border-bottom:none}
+.adot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.prog-bar{height:4px;background:#e2e8f0;border-radius:2px;margin-top:5px}
+.prog-fill{height:100%;background:var(--blue);border-radius:2px}
+.appt-card{padding:10px 14px;border-bottom:.5px solid var(--border)}
+.appt-card:last-child{border-bottom:none}
+.empty{padding:20px 14px;font-size:11px;color:var(--text2);text-align:center}
+.panels-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.panels-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:900px){.panels-2,.panels-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+
+<div class="main">
+  <div class="page-hdr">
+    <div class="page-title">📊 Dashboard</div>
+    <button class="btn btn-sm" onclick="loadFromSheet().then(renderDash)" style="color:var(--blue)">↻ Refresh</button>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="dash-grid" id="dash-stats"></div>
+
+  <!-- Row 1: Appointments + Recent Invoices -->
+  <div class="panels-2" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="panel-hdr">📅 Upcoming Appointments <button class="btn btn-xs" onclick="navTo('appointments')">View All</button></div>
+      <div class="panel-body" id="dash-appts"><div class="empty">No upcoming appointments</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">🧾 Recent Invoices <button class="btn btn-xs" onclick="navTo('invoices')">View All</button></div>
+      <div class="panel-body" id="dash-invoices"><div class="empty">No invoices yet</div></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Active Projects + Recent Quotations -->
+  <div class="panels-2" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="panel-hdr">🏗️ Active Projects <button class="btn btn-xs" onclick="navTo('projects')">View All</button></div>
+      <div class="panel-body" id="dash-projects"><div class="empty">No active projects</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">📄 Recent Quotations <button class="btn btn-xs" onclick="navTo('quotations')">View All</button></div>
+      <div class="panel-body" id="dash-quot"><div class="empty">No quotations yet</div></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Pending Deliveries + Low Stock + AMC Expiring -->
+  <div class="panels-3">
+    <div class="panel">
+      <div class="panel-hdr">📦 Pending Deliveries <button class="btn btn-xs" onclick="navTo('delivery')">View All</button></div>
+      <div class="panel-body" id="dash-deliveries"><div class="empty">No pending deliveries</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">⚠️ Low Stock <button class="btn btn-xs" onclick="navTo('inventory')">View All</button></div>
+      <div class="panel-body" id="dash-stock"><div class="empty">All stock levels OK ✅</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">🔄 AMC Expiring Soon <button class="btn btn-xs" onclick="navTo('amc-contracts')">View All</button></div>
+      <div class="panel-body" id="dash-amc"><div class="empty">No contracts expiring soon ✅</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+async function main() {
+  const ok = await initPage('dashboard', 'Dashboard');
+  if (ok) renderDash();
+}
+
+function renderDash() {
+  renderStats();
+  renderAppts();
+  renderInvoices();
+  renderProjects();
+  renderQuotations();
+  renderDeliveries();
+  renderStock();
+  renderAMC();
+}
+
+function renderStats() {
+  const D = SBR;
+  let paid=0, pending=0, overdue=0;
+  D.invoices.forEach(inv => {
+    const t = invTotal(inv);
+    if (inv.status==='Paid') paid += t;
+    else if (inv.status==='Overdue') overdue += t;
+    else pending += t;
+  });
+  const active = D.projects.filter(p => p.status==='In Progress').length;
+  const lowStock = D.inventory.filter(i => i.qty <= i.min).length;
+  const activeAMC = D.amcContracts.filter(a => a.status==='Active').length;
+
+  const cards = [
+    { cls:'sc-green', icon:'💰', val:'AED '+fmt(paid),    lbl:'Collected',       sub:'Paid invoices',    page:'invoices' },
+    { cls:'sc-amber', icon:'⏳', val:'AED '+fmt(pending),  lbl:'Pending',         sub:'Awaiting payment', page:'invoices' },
+    ...(overdue ? [{ cls:'sc-red', icon:'🔴', val:'AED '+fmt(overdue), lbl:'Overdue', sub:'Action needed', page:'invoices' }] : []),
+    { cls:'sc-blue',  icon:'🏗️', val:active,              lbl:'Active Projects', sub:'In progress',      page:'projects' },
+    { cls:'sc-purple',icon:'👥', val:D.clients.length,     lbl:'Clients',         sub:'Registered',       page:'clients' },
+    { cls:'sc-blue',  icon:'📄', val:D.savedQuotations.length, lbl:'Quotations',  sub:'Saved total',      page:'quotations' },
+    { cls:'sc-blue',  icon:'🔄', val:activeAMC,            lbl:'Active AMC',      sub:'Contracts running',page:'amc-contracts' },
+    ...(lowStock ? [{ cls:'sc-red', icon:'⚠️', val:lowStock, lbl:'Low Stock', sub:'Items below min', page:'inventory' }] : []),
+  ];
+
+  document.getElementById('dash-stats').innerHTML = cards.map(c =>
+    `<div class="stat-card ${c.cls}" data-icon="${c.icon}" onclick="navTo('${c.page}')">
+      <div class="stat-val">${c.val}</div>
+      <div class="stat-lbl">${c.lbl}</div>
+      <div class="stat-sub">${c.sub}</div>
+    </div>`
+  ).join('');
+}
+
+function invTotal(inv) {
+  return (inv.items||[]).reduce((s,it) => s + (it.qty||1)*(it.price||0)*(1+(it.vat||0)/100), 0);
+}
+
+function renderAppts() {
+  const today = td();
+  const list = SBR.appointments
+    .filter(a => a.date >= today && a.status !== 'Completed')
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0, 6);
+  const el = document.getElementById('dash-appts');
+  if (!list.length) { el.innerHTML = '<div class="empty">No upcoming appointments</div>'; return; }
+  el.innerHTML = list.map(a => {
+    const statusColors = { 'Scheduled':'#0F4C81','Follow-up':'#d97706','Overdue':'#dc2626','Completed':'#16a34a' };
+    const col = statusColors[a.status] || '#6b7280';
+    return `<div class="appt-card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:12px;font-weight:600">${escH(a.title)}</div>
+        ${badgeHTML(a.status)}
+      </div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">
+        📅 ${formatDate(a.date)}${a.time ? ' · ⏰ '+a.time : ''}${a.client ? ' · '+escH(a.client) : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderInvoices() {
+  const list = SBR.invoices.slice().sort((a,b) => b.id-a.id).slice(0, 6);
+  const el = document.getElementById('dash-invoices');
+  if (!list.length) { el.innerHTML = '<div class="empty">No invoices yet</div>'; return; }
+  el.innerHTML = list.map(inv => {
+    const c = SBR.clients.find(x => x.id===inv.clientId) || { name:'—' };
+    const t = invTotal(inv);
+    const col = inv.status==='Paid'?'#16a34a':inv.status==='Overdue'?'#dc2626':'#d97706';
+    return `<div class="aitem" onclick="navTo('invoices')">
+      <div class="adot" style="background:${col}"></div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${escH(inv.num)}</div>
+        <div style="font-size:10px;color:var(--text2)">${escH(c.name)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:600;color:var(--blue)">AED ${fmt(t)}</div>
+        ${badgeHTML(inv.status)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProjects() {
+  const list = SBR.projects.filter(p => p.status==='In Progress').slice(0, 5);
+  const el = document.getElementById('dash-projects');
+  if (!list.length) { el.innerHTML = '<div class="empty">No active projects</div>'; return; }
+  el.innerHTML = list.map(p => {
+    const c = SBR.clients.find(x => x.id===p.clientId) || { name:'—' };
+    const prog = p.progress || 0;
+    return `<div class="aitem" onclick="navTo('projects')">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${escH(p.name)}</div>
+        <div style="font-size:10px;color:var(--text2)">${escH(c.name)}${p.end?' · Due: '+formatDate(p.end):''}</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--blue);margin-left:10px">${prog}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderQuotations() {
+  const list = SBR.savedQuotations.slice().sort((a,b) => b.id-a.id).slice(0, 6);
+  const el = document.getElementById('dash-quot');
+  if (!list.length) { el.innerHTML = '<div class="empty">No quotations yet</div>'; return; }
+  el.innerHTML = list.map(qt => {
+    const c = qt.clientId ? SBR.clients.find(x => x.id===qt.clientId) : null;
+    return `<div class="aitem" onclick="navTo('quotations')">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${escH(qt.num)}${qt.projectRef?` <span style="font-size:10px;color:var(--teal)">· ${escH(qt.projectRef)}</span>`:''}</div>
+        <div style="font-size:10px;color:var(--text2)">${c?escH(c.name):'No client'} · ${qt.date||'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;font-weight:600;color:var(--blue)">AED ${fmt(qt.total)}</div>
+        ${badgeHTML(qt.status)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDeliveries() {
+  const list = SBR.deliveryNotes.filter(d => d.status==='Pending').slice(0, 5);
+  const el = document.getElementById('dash-deliveries');
+  if (!list.length) { el.innerHTML = '<div class="empty">✅ No pending deliveries</div>'; return; }
+  el.innerHTML = list.map(dn => {
+    const c = SBR.clients.find(x => x.id===dn.clientId) || { name:'—' };
+    return `<div class="aitem" onclick="navTo('delivery')">
+      <div class="adot" style="background:#d97706"></div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${escH(dn.num)}</div>
+        <div style="font-size:10px;color:var(--text2)">${escH(c.name)} · ${(dn.items||[]).length} items</div>
+      </div>
+      <div style="font-size:11px;color:var(--amber);font-weight:600">${dn.del||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderStock() {
+  const list = SBR.inventory.filter(i => i.qty <= i.min).slice(0, 5);
+  const el = document.getElementById('dash-stock');
+  if (!list.length) { el.innerHTML = '<div class="empty">✅ All stock levels OK</div>'; return; }
+  el.innerHTML = list.map(i => `<div class="aitem" onclick="navTo('inventory')">
+    <div class="adot" style="background:#dc2626"></div>
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:500">${escH(i.name)}</div>
+      <div style="font-size:10px;color:var(--text2)">Min: ${i.min} ${i.unit||''}</div>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:#dc2626">${i.qty} ${i.unit||''}</div>
+  </div>`).join('');
+}
+
+function renderAMC() {
+  const now = new Date();
+  const list = SBR.amcContracts.filter(a => {
+    if (a.status !== 'Active') return false;
+    const days = Math.ceil((new Date(a.end) - now) / 86400000);
+    return days <= 90;
+  }).sort((a,b) => new Date(a.end)-new Date(b.end)).slice(0, 5);
+  const el = document.getElementById('dash-amc');
+  if (!list.length) { el.innerHTML = '<div class="empty">✅ No contracts expiring soon</div>'; return; }
+  el.innerHTML = list.map(a => {
+    const c = SBR.clients.find(x => x.id===a.clientId) || { name:'—' };
+    const days = Math.ceil((new Date(a.end) - now) / 86400000);
+    const col = days<=30?'#dc2626':days<=60?'#d97706':'#16a34a';
+    return `<div class="aitem" onclick="navTo('amc-contracts')">
+      <div class="adot" style="background:${col}"></div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${escH(c.name)}</div>
+        <div style="font-size:10px;color:var(--text2)">${escH(a.num)} · Expires: ${a.end}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${col}">${days}d</div>
+    </div>`;
+  }).join('');
+}
+
+main();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — AMC Contracts</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">📋 AMC Contracts</div><button class="btn btn-p" onclick="openForm()">+ New Contract</button></div>
+  <input class="search-bar" id="search" placeholder="Search contracts..." oninput="render()" style="max-width:320px;margin-bottom:16px">
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New AMC Contract</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Contract No.</label><input class="fi" id="ac-num"></div>
+      <div class="field"><label class="flbl">Client</label><select class="fi" id="ac-client"><option value="">— Select —</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Start Date</label><input class="fi" id="ac-start" type="date"></div>
+      <div class="field"><label class="flbl">End Date</label><input class="fi" id="ac-end" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Annual Value (AED)</label><input class="fi" id="ac-value" type="number" min="0"></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="ac-status"><option>Active</option><option>Expired</option><option>Cancelled</option></select></div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="ac-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null;
+async function main(){const ok=await initPage('amc-contracts','AMC Contracts');if(ok)render();}
+function populateClients(){const sel=document.getElementById('ac-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const now=new Date();
+  const list=SBR.amcContracts.filter(a=>!q||(a.num||'').toLowerCase().includes(q));
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No AMC contracts yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Contract No.</th><th>Client</th><th>Start</th><th>End</th><th>Annual Value</th><th>Days Left</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(a=>{const c=SBR.clients.find(x=>x.id===a.clientId)||{name:'—'};const days=a.end?Math.ceil((new Date(a.end)-now)/86400000):null;const col=days!=null?(days<=30?'#dc2626':days<=90?'#d97706':'#16a34a'):'#6b7280';return`<tr onclick="openForm(${a.id})" style="cursor:pointer">
+    <td style="font-weight:600">${escH(a.num||'—')}</td><td>${escH(c.name)}</td><td>${formatDate(a.start)}</td><td>${formatDate(a.end)}</td>
+    <td style="font-weight:700;color:var(--blue)">AED ${fmt(a.value||0)}</td>
+    <td style="font-weight:700;color:${col}">${days!=null?days+'d':'—'}</td>
+    <td>${badgeHTML(a.status)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${a.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${a.id})">✕</button>
+    </div></td>
+  </tr>`;}).join('')+'</tbody></table>';
+}
+function openForm(id){
+  editId=id||null;populateClients();
+  const num='AMC-2026-0'+SBR.amcIdCtr;
+  if(id){const a=SBR.amcContracts.find(x=>x.id===id);if(!a)return;document.getElementById('modal-title').textContent='✏️ Edit Contract';sv('ac-num',a.num);sv('ac-client',a.clientId||'');sv('ac-start',a.start||'');sv('ac-end',a.end||'');sv('ac-value',a.value||0);sv('ac-status',a.status||'Active');sv('ac-notes',a.notes||'');}
+  else{document.getElementById('modal-title').textContent='+ New AMC Contract';sv('ac-num',num);sv('ac-client','');sv('ac-start',td());sv('ac-end','');sv('ac-value',0);sv('ac-status','Active');sv('ac-notes','');}
+  document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const obj={num:gv('ac-num')||'AMC-2026-0'+SBR.amcIdCtr,clientId:parseInt(gv('ac-client'))||null,start:gv('ac-start'),end:gv('ac-end'),value:parseFloat(gv('ac-value'))||0,status:gv('ac-status'),notes:gv('ac-notes')};
+  if(editId){const a=SBR.amcContracts.find(x=>x.id===editId);if(a)Object.assign(a,obj);}
+  else SBR.amcContracts.push({id:SBR.amcIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Contract saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.amcContracts=SBR.amcContracts.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

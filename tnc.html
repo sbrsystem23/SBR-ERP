@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Terms & Conditions</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">📜 Terms & Conditions</div><button class="btn btn-p" onclick="save()">💾 Save</button></div>
+  <div class="card">
+    <div class="card-title">Standard Terms & Conditions</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:12px">These terms appear on the last page of printed quotations. Enter one term per line.</p>
+    <div id="tnc-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="new-tnc" placeholder="Add new term...">
+      <button class="btn btn-p btn-sm" onclick="addTnc()">+ Add</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+async function main(){const ok=await initPage('tnc','Terms & Conditions');if(ok)renderTnc();}
+function renderTnc(){
+  const el=document.getElementById('tnc-list');
+  el.innerHTML=(SBR.SBR_TNC||[]).map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border)">
+    <span style="font-size:10px;color:var(--text2);width:20px;text-align:right;flex-shrink:0">${i+1}.</span>
+    <textarea class="fi" id="tnc-${i}" rows="2" style="flex:1;min-height:36px">${escH(t)}</textarea>
+    <button onclick="SBR.SBR_TNC.splice(${i},1);renderTnc()" class="btn btn-xs btn-r">✕</button>
+  </div>`).join('');
+}
+function addTnc(){const val=gv('new-tnc').trim();if(!val)return;SBR.SBR_TNC=SBR.SBR_TNC||[];SBR.SBR_TNC.push(val);sv('new-tnc','');renderTnc();}
+function save(){
+  SBR.SBR_TNC=(SBR.SBR_TNC||[]).map((t,i)=>gv('tnc-'+i)||t).filter(t=>t.trim());
+  saveAllData();renderTnc();showToast('✅ Terms & Conditions saved!');
+}
+main();
+</script>
+</body>
+</html>

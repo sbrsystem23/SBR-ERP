@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Clients</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr">
+    <div class="page-title">👥 Clients</div>
+    <button class="btn btn-p" onclick="openForm()">+ Add Client</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="client-search" placeholder="Search clients..." oninput="render()" style="max-width:320px">
+    <select class="fi" id="type-filter" onchange="render()" style="max-width:180px">
+      <option value="">All Types</option>
+    </select>
+    <span id="client-count" style="font-size:11px;color:var(--text2);align-self:center"></span>
+  </div>
+  <div class="list-wrap">
+    <table class="tbl" id="client-table">
+      <thead>
+        <tr>
+          <th>Client Name</th>
+          <th>Type</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>TRN</th>
+          <th>Contact Person</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="client-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Client Form Modal -->
+<div class="modal-bg" id="client-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">➕ Add Client</div>
+      <button onclick="document.getElementById('client-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2)">✕</button>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client Name *</label><input class="fi" id="cf-name" placeholder="Full company or person name"></div>
+      <div class="field"><label class="flbl">Type</label><select class="fi" id="cf-type"></select></div>
+    </div>
+    <div class="field"><label class="flbl">Address</label><input class="fi" id="cf-addr" placeholder="Full address"></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Phone</label><input class="fi" id="cf-phone" placeholder="+971 4 ..."></div>
+      <div class="field"><label class="flbl">Email</label><input class="fi" id="cf-email" placeholder="email@example.com"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">TRN</label><input class="fi" id="cf-trn" placeholder="Tax Registration Number"></div>
+      <div class="field"><label class="flbl">Contact Person</label><input class="fi" id="cf-contact" placeholder="Contact person name"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Mobile</label><input class="fi" id="cf-mobile" placeholder="+971 50 ..."></div>
+      <div class="field"><label class="flbl">Whatsapp</label><input class="fi" id="cf-wa" placeholder="+971 50 ..."></div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="cf-notes" rows="2" placeholder="Any notes..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" onclick="document.getElementById('client-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-r" id="del-btn" onclick="deleteClient()" style="display:none">🗑️ Delete</button>
+      <button class="btn btn-p" onclick="saveClient()">💾 Save Client</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let editId = null;
+
+async function main() {
+  const ok = await initPage('clients', 'Clients');
+  if (ok) render();
+}
+
+function render() {
+  const q = document.getElementById('client-search').value.toLowerCase();
+  const tf = document.getElementById('type-filter');
+  const type = tf.value;
+
+  // Populate type filter
+  const types = [...new Set(SBR.clients.map(c => c.type || '').filter(Boolean))];
+  const cur = tf.value;
+  tf.innerHTML = '<option value="">All Types</option>' + types.map(t => `<option value="${t}"${t===cur?' selected':''}>${escH(t)}</option>`).join('');
+
+  let list = SBR.clients.filter(c => {
+    const ms = !q || (c.name||'').toLowerCase().includes(q) || (c.trn||'').includes(q) || (c.phone||'').includes(q) || (c.email||'').toLowerCase().includes(q) || (c.addr||'').toLowerCase().includes(q);
+    const mt = !type || c.type === type;
+    return ms && mt;
+  });
+
+  document.getElementById('client-count').textContent = list.length + ' client' + (list.length===1?'':'s');
+
+  const tbody = document.getElementById('client-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2)">No clients found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td>
+        <div style="font-weight:600;color:var(--blue)">${escH(c.name)}</div>
+        ${c.addr ? `<div style="font-size:10px;color:var(--text2);margin-top:2px">📍 ${escH(c.addr)}</div>` : ''}
+      </td>
+      <td>${c.type ? `<span style="background:var(--blue-lt);color:var(--blue);padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap">${escH(c.type)}</span>` : '—'}</td>
+      <td style="font-size:11px">${escH(c.phone || (c.phones&&c.phones[0]?c.phones[0].number:'') || '—')}</td>
+      <td style="font-size:11px">${escH(c.email || (c.persons&&c.persons[0]?c.persons[0].email:'') || '—')}</td>
+      <td style="font-size:11px">${escH(c.trn||'—')}</td>
+      <td style="font-size:11px">${escH(c.contact || (c.persons&&c.persons[0]?c.persons[0].name:'') || '—')}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-xs btn-p" onclick="openForm(${c.id})">✏️ Edit</button>
+          <button class="btn btn-xs btn-r" onclick="deleteClientById(${c.id})">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openForm(id) {
+  editId = id || null;
+  const modal = document.getElementById('client-modal');
+  const delBtn = document.getElementById('del-btn');
+
+  // Populate type select
+  const ts = document.getElementById('cf-type');
+  const types = (SBR.cats.client || ['Residential','Commercial','Developer','Government']);
+  ts.innerHTML = types.map(t => `<option value="${t}">${escH(typeof t==='object'?t.name:t)}</option>`).join('');
+
+  if (id) {
+    const c = SBR.clients.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('modal-title').textContent = '✏️ Edit Client';
+    delBtn.style.display = '';
+    sv('cf-name',c.name||''); sv('cf-type',c.type||''); sv('cf-addr',c.addr||'');
+    sv('cf-phone',c.phone||''); sv('cf-email',c.email||''); sv('cf-trn',c.trn||'');
+    sv('cf-contact',c.contact||''); sv('cf-mobile',c.mobile||''); sv('cf-wa',c.wa||'');
+    sv('cf-notes',c.notes||'');
+  } else {
+    document.getElementById('modal-title').textContent = '➕ Add Client';
+    delBtn.style.display = 'none';
+    ['cf-name','cf-addr','cf-phone','cf-email','cf-trn','cf-contact','cf-mobile','cf-wa','cf-notes'].forEach(i => sv(i,''));
+    if (types.length) sv('cf-type', typeof types[0]==='object'?types[0].name:types[0]);
+  }
+  modal.style.display = 'flex';
+}
+
+function saveClient() {
+  const name = gv('cf-name').trim();
+  if (!name) { showToast('Client name is required', 'error'); return; }
+  const obj = {
+    name, type:gv('cf-type'), addr:gv('cf-addr'), phone:gv('cf-phone'),
+    email:gv('cf-email'), trn:gv('cf-trn'), contact:gv('cf-contact'),
+    mobile:gv('cf-mobile'), wa:gv('cf-wa'), notes:gv('cf-notes'),
+  };
+  if (editId) {
+    const c = SBR.clients.find(x => x.id === editId);
+    if (c) Object.assign(c, obj);
+  } else {
+    SBR.clients.push({ id: SBR.cIdCtr++, ...obj });
+  }
+  saveAllData();
+  document.getElementById('client-modal').style.display = 'none';
+  render();
+  showToast('✅ Client saved!');
+}
+
+function deleteClient() {
+  if (!editId) return;
+  if (!confirm('Delete this client? This cannot be undone.')) return;
+  SBR.clients = SBR.clients.filter(x => x.id !== editId);
+  saveAllData();
+  document.getElementById('client-modal').style.display = 'none';
+  render();
+  showToast('Client deleted');
+}
+
+function deleteClientById(id) {
+  if (!confirm('Delete this client?')) return;
+  SBR.clients = SBR.clients.filter(x => x.id !== id);
+  saveAllData();
+  render();
+  showToast('Client deleted');
+}
+
+main();
+</script>
+</body>
+</html>

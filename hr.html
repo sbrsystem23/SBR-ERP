@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — HR & Staff</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">👤 HR & Staff</div><button class="btn btn-p" onclick="openForm()">+ Add Staff</button></div>
+  <input class="search-bar" id="search" placeholder="Search staff..." oninput="render()" style="max-width:320px;margin-bottom:16px">
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ Add Staff</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Full Name *</label><input class="fi" id="hf-name"></div>
+      <div class="field"><label class="flbl">Role / Position</label><input class="fi" id="hf-role"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Phone</label><input class="fi" id="hf-phone"></div>
+      <div class="field"><label class="flbl">Email</label><input class="fi" id="hf-email"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Hourly Rate (AED)</label><input class="fi" id="hf-rate" type="number" min="0" step="0.01"></div>
+      <div class="field"><label class="flbl">Join Date</label><input class="fi" id="hf-join" type="date"></div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="hf-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null;
+async function main(){const ok=await initPage('hr','HR & Staff');if(ok)render();}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const list=SBR.staff.filter(s=>!q||(s.name||'').toLowerCase().includes(q)||(s.role||'').toLowerCase().includes(q));
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-text">No staff members yet.</div></div>';return;}
+  el.innerHTML=list.map(s=>`<div class="list-item" onclick="openForm(${s.id})">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-right:12px">${(s.name||'?')[0].toUpperCase()}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${escH(s.name)}</div>
+      <div style="font-size:11px;color:var(--text2)">${escH(s.role||'—')}${s.phone?' · 📞 '+escH(s.phone):''}</div>
+    </div>
+    <div style="text-align:right;margin-right:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--blue)">AED ${fmt(s.rate||0)}/hr</div>
+      <div style="font-size:10px;color:var(--text3)">${s.join?'Joined: '+s.join:''}</div>
+    </div>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${s.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${s.id})">✕</button>
+    </div>
+  </div>`).join('');
+}
+function openForm(id){
+  editId=id||null;
+  if(id){const s=SBR.staff.find(x=>x.id===id);if(!s)return;document.getElementById('modal-title').textContent='✏️ Edit Staff';sv('hf-name',s.name);sv('hf-role',s.role||'');sv('hf-phone',s.phone||'');sv('hf-email',s.email||'');sv('hf-rate',s.rate||0);sv('hf-join',s.join||'');sv('hf-notes',s.notes||'');}
+  else{document.getElementById('modal-title').textContent='+ Add Staff';['hf-name','hf-role','hf-phone','hf-email','hf-notes'].forEach(i=>sv(i,''));sv('hf-rate',0);sv('hf-join',td());}
+  document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const name=gv('hf-name').trim();if(!name){showToast('Name required','error');return;}
+  const obj={name,role:gv('hf-role'),phone:gv('hf-phone'),email:gv('hf-email'),rate:parseFloat(gv('hf-rate'))||0,join:gv('hf-join'),notes:gv('hf-notes')};
+  if(editId){const s=SBR.staff.find(x=>x.id===editId);if(s)Object.assign(s,obj);}
+  else SBR.staff.push({id:SBR.hrIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.staff=SBR.staff.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

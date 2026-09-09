@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Appointments</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr">
+    <div class="page-title">📅 Appointments & Follow-ups</div>
+    <button class="btn btn-p" onclick="openApptForm()">+ New Appointment</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="appt-search" placeholder="Search appointments..." oninput="renderAppts()" style="max-width:280px">
+    <select class="fi" id="appt-status-filter" onchange="renderAppts()" style="max-width:160px">
+      <option value="">All Status</option>
+      <option>Scheduled</option><option>Completed</option><option>Cancelled</option><option>Follow-up</option>
+    </select>
+    <select class="fi" id="appt-type-filter" onchange="renderAppts()" style="max-width:160px">
+      <option value="">All Types</option>
+      <option>Site Visit</option><option>Meeting</option><option>Follow-up</option><option>Demo</option><option>Support</option>
+    </select>
+  </div>
+  <div id="appt-list" class="list-wrap"></div>
+</div>
+
+<!-- Appointment Form Modal -->
+<div class="modal-bg" id="appt-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="appt-modal-title">+ New Appointment</div>
+      <button onclick="document.getElementById('appt-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="field"><label class="flbl">Title *</label><input class="fi" id="af-title" placeholder="Appointment title"></div>
+    <div class="fg3">
+      <div class="field"><label class="flbl">Type</label>
+        <select class="fi" id="af-type"><option>Site Visit</option><option>Meeting</option><option>Follow-up</option><option>Demo</option><option>Support</option></select>
+      </div>
+      <div class="field"><label class="flbl">Date *</label><input class="fi" id="af-date" type="date"></div>
+      <div class="field"><label class="flbl">Time</label><input class="fi" id="af-time" type="time"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client</label><input class="fi" id="af-client" placeholder="Client name"></div>
+      <div class="field"><label class="flbl">Status</label>
+        <select class="fi" id="af-status"><option>Scheduled</option><option>Completed</option><option>Cancelled</option><option>Follow-up</option></select>
+      </div>
+    </div>
+    <div class="field"><label class="flbl">Location / Address</label><input class="fi" id="af-location" placeholder="Meeting location"></div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="af-notes" rows="3" placeholder="Notes about this appointment..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('appt-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="saveAppt()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let editApptId = null;
+
+async function main() {
+  const ok = await initPage('appointments', 'Appointments');
+  if (ok) renderAppts();
+}
+
+function renderAppts() {
+  const search = document.getElementById('appt-search').value.toLowerCase();
+  const statusF = document.getElementById('appt-status-filter').value;
+  const typeF = document.getElementById('appt-type-filter').value;
+  const today = td();
+
+  let list = SBR.appointments.filter(a => {
+    const ms = !search || (a.title||'').toLowerCase().includes(search) || (a.client||'').toLowerCase().includes(search);
+    const mst = !statusF || a.status === statusF;
+    const mt = !typeF || a.type === typeF;
+    return ms && mst && mt;
+  }).sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  const el = document.getElementById('appt-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">No appointments found.</div></div>'; return; }
+
+  el.innerHTML = list.map(a => {
+    const isOverdue = a.date < today && a.status === 'Scheduled';
+    const statusCol = { Scheduled:'#0F4C81', Completed:'#16a34a', Cancelled:'#dc2626', 'Follow-up':'#d97706' }[a.status] || '#6b7280';
+    return `<div class="list-item" onclick="openApptForm(${a.id})">
+      <div style="width:4px;align-self:stretch;background:${isOverdue?'#dc2626':statusCol};border-radius:2px;margin-right:12px;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${escH(a.title)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">
+          📅 ${formatDate(a.date)}${a.time?' · ⏰ '+a.time:''}${a.type?' · '+a.type:''}${a.client?' · 👤 '+escH(a.client):''}
+        </div>
+        ${a.location?`<div style="font-size:10px;color:var(--text3)">📍 ${escH(a.location)}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${badgeHTML(isOverdue?'Overdue':a.status)}
+        <button class="btn btn-xs btn-r" onclick="event.stopPropagation();deleteAppt(${a.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openApptForm(id) {
+  editApptId = id || null;
+  const modal = document.getElementById('appt-modal');
+  if (id) {
+    const a = SBR.appointments.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('appt-modal-title').textContent = '✏️ Edit Appointment';
+    sv('af-title',a.title); sv('af-type',a.type||'Site Visit'); sv('af-date',a.date);
+    sv('af-time',a.time||''); sv('af-client',a.client||''); sv('af-status',a.status||'Scheduled');
+    sv('af-location',a.location||''); sv('af-notes',a.notes||'');
+  } else {
+    document.getElementById('appt-modal-title').textContent = '+ New Appointment';
+    ['af-title','af-client','af-location','af-notes','af-time'].forEach(i=>sv(i,''));
+    sv('af-date', td()); sv('af-type','Site Visit'); sv('af-status','Scheduled');
+  }
+  modal.style.display = 'flex';
+}
+
+function saveAppt() {
+  const title = gv('af-title').trim();
+  if (!title) { showToast('Title required','error'); return; }
+  const obj = { title, type:gv('af-type'), date:gv('af-date'), time:gv('af-time'), client:gv('af-client'), status:gv('af-status'), location:gv('af-location'), notes:gv('af-notes') };
+  if (editApptId) { const a=SBR.appointments.find(x=>x.id===editApptId); if(a) Object.assign(a,obj); }
+  else { SBR.appointments.push({ id:SBR.apptIdCtr++, ...obj }); }
+  saveAllData(); document.getElementById('appt-modal').style.display='none';
+  renderAppts(); showToast('✅ Appointment saved!');
+}
+
+function deleteAppt(id) {
+  if (!confirm('Delete this appointment?')) return;
+  SBR.appointments = SBR.appointments.filter(x => x.id !== id);
+  saveAllData(); renderAppts(); showToast('Deleted');
+}
+
+main();
+</script>
+</body>
+</html>

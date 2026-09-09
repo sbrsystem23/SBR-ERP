@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Settings</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">⚙️ Settings & Categories</div></div>
+
+  <!-- Company Info -->
+  <div class="card">
+    <div class="card-title">🏢 Company Information</div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Company Name</label><input class="fi" id="co-name" placeholder="Company name"></div>
+      <div class="field"><label class="flbl">TRN</label><input class="fi" id="co-trn" placeholder="Tax Registration Number"></div>
+    </div>
+    <div class="field"><label class="flbl">Address</label><input class="fi" id="co-addr" placeholder="Full address"></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Phone</label><input class="fi" id="co-phone" placeholder="+971..."></div>
+      <div class="field"><label class="flbl">Email</label><input class="fi" id="co-email" placeholder="info@..."></div>
+    </div>
+    <div class="card-title" style="margin-top:12px">🏦 Bank Details</div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Bank Name</label><input class="fi" id="co-bank"></div>
+      <div class="field"><label class="flbl">Account Name</label><input class="fi" id="co-acname"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Account No.</label><input class="fi" id="co-acnum"></div>
+      <div class="field"><label class="flbl">IBAN</label><input class="fi" id="co-iban"></div>
+      <div class="field"><label class="flbl">SWIFT / BIC</label><input class="fi" id="co-swift"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveCompany()">💾 Save Company Info</button>
+  </div>
+
+  <!-- Categories -->
+  <div class="card">
+    <div class="card-title">🗂️ Category Manager</div>
+    <div class="fg2">
+      <div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px">Client Types</div>
+        <div id="cat-client"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input class="fi" id="new-cat-client" placeholder="New type...">
+          <button class="btn btn-sm btn-p" onclick="addCat('client')">Add</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px">Project Types</div>
+        <div id="cat-proj"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input class="fi" id="new-cat-proj" placeholder="New type...">
+          <button class="btn btn-sm btn-p" onclick="addCat('proj')">Add</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px">Payment Terms</div>
+        <div id="cat-terms"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input class="fi" id="new-cat-terms" placeholder="New term...">
+          <button class="btn btn-sm btn-p" onclick="addCat('terms')">Add</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px">Delivery Methods</div>
+        <div id="cat-deliv"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input class="fi" id="new-cat-deliv" placeholder="New method...">
+          <button class="btn btn-sm btn-p" onclick="addCat('deliv')">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Terms -->
+  <div class="card">
+    <div class="card-title">📋 Key Terms & Conditions</div>
+    <div id="key-terms-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="new-key-term" placeholder="Add new key term...">
+      <button class="btn btn-p btn-sm" onclick="addKeyTerm()">+ Add</button>
+    </div>
+    <button class="btn btn-p" style="margin-top:10px" onclick="saveKeyTerms()">💾 Save Key Terms</button>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+async function main() {
+  const ok = await initPage('settings','Settings & Categories');
+  if (ok) { loadCompany(); renderCategories(); renderKeyTerms(); }
+}
+
+function loadCompany() {
+  const co = SBR.companyInfo;
+  sv('co-name',co.name); sv('co-trn',co.trn); sv('co-addr',co.addr);
+  sv('co-phone',co.phone); sv('co-email',co.email);
+  sv('co-bank',co.bank); sv('co-acname',co.acname); sv('co-acnum',co.acnum);
+  sv('co-iban',co.iban); sv('co-swift',co.swift);
+}
+
+function saveCompany() {
+  Object.assign(SBR.companyInfo, {
+    name:gv('co-name'), trn:gv('co-trn'), addr:gv('co-addr'),
+    phone:gv('co-phone'), email:gv('co-email'),
+    bank:gv('co-bank'), acname:gv('co-acname'), acnum:gv('co-acnum'),
+    iban:gv('co-iban'), swift:gv('co-swift'),
+  });
+  saveAllData(); showToast('✅ Company info saved!');
+}
+
+function renderCategories() {
+  ['client','proj','terms','deliv'].forEach(type => {
+    const el = document.getElementById('cat-'+type);
+    if (!el) return;
+    el.innerHTML = (SBR.cats[type]||[]).map((item,i) => {
+      const name = typeof item==='object'?item.name:item;
+      const hidden = typeof item==='object'&&item.hidden;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border:.5px solid var(--border);border-radius:5px;margin-bottom:4px;opacity:${hidden?.5:1}">
+        <span style="font-size:11px${hidden?';text-decoration:line-through;color:var(--text3)':''}">${escH(name)}</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-xs" onclick="toggleCatItem('${type}',${i})" style="background:${hidden?'#dcfce7':'#fef3c7'};color:${hidden?'#166534':'#92400e'}">${hidden?'👁':'🙈'}</button>
+          <button class="btn btn-xs btn-r" onclick="removeCatItem('${type}',${i})">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function addCat(type) {
+  const val = gv('new-cat-'+type).trim();
+  if (!val) return;
+  SBR.cats[type] = SBR.cats[type]||[];
+  SBR.cats[type].push(val);
+  sv('new-cat-'+type,'');
+  saveAllData(); renderCategories(); showToast('Added');
+}
+
+function removeCatItem(type,i) {
+  SBR.cats[type].splice(i,1);
+  saveAllData(); renderCategories();
+}
+
+function toggleCatItem(type,i) {
+  let item = SBR.cats[type][i];
+  if (typeof item==='string') item = {name:item};
+  item.hidden = !item.hidden;
+  SBR.cats[type][i] = item;
+  saveAllData(); renderCategories();
+}
+
+function renderKeyTerms() {
+  const el = document.getElementById('key-terms-list');
+  el.innerHTML = SBR.SBR_KEY_TERMS.map((t,i) => {
+    const text = typeof t==='object'?t.text:t;
+    const hidden = typeof t==='object'&&t.hidden;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);opacity:${hidden?.5:1}">
+      <span style="font-size:10px;color:var(--text2);width:20px;text-align:right;flex-shrink:0">${i+1}.</span>
+      <input class="fi" id="kt-${i}" value="${escH(text)}" style="flex:1${hidden?';text-decoration:line-through':''}" ${hidden?'disabled':''}>
+      <button onclick="toggleKeyTerm(${i})" class="btn btn-xs" style="background:${hidden?'#dcfce7':'#fef3c7'};color:${hidden?'#166534':'#92400e'}">${hidden?'👁':'🙈'}</button>
+      <button onclick="removeKeyTerm(${i})" class="btn btn-xs btn-r">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addKeyTerm() {
+  const val = gv('new-key-term').trim();
+  if (!val) return;
+  SBR.SBR_KEY_TERMS.push(val);
+  sv('new-key-term','');
+  renderKeyTerms();
+}
+
+function removeKeyTerm(i) {
+  SBR.SBR_KEY_TERMS.splice(i,1);
+  renderKeyTerms();
+}
+
+function toggleKeyTerm(i) {
+  let t = SBR.SBR_KEY_TERMS[i];
+  if (typeof t==='string') t={text:t};
+  t.hidden = !t.hidden;
+  SBR.SBR_KEY_TERMS[i] = t;
+  renderKeyTerms();
+}
+
+function saveKeyTerms() {
+  // Read all inputs
+  SBR.SBR_KEY_TERMS = SBR.SBR_KEY_TERMS.map((t,i) => {
+    const hidden = typeof t==='object'&&t.hidden;
+    const text = hidden?(typeof t==='object'?t.text:t):gv('kt-'+i);
+    return hidden?{text,hidden:true}:text;
+  }).filter(t => (typeof t==='object'?t.text:t).trim());
+  saveAllData(); renderKeyTerms(); showToast('✅ Key Terms saved!');
+}
+
+main();
+</script>
+</body>
+</html>

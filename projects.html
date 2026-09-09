@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Projects</title><link rel="stylesheet" href="shared.css">
+<style>
+.proj-card{background:#fff;border-radius:10px;border:.5px solid var(--border);padding:16px;cursor:pointer;transition:all .15s}
+.proj-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-2px)}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.prog-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:8px 0}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
+</style>
+</head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">🏗️ Projects</div><button class="btn btn-p" onclick="openForm()">+ New Project</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search projects..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:160px">
+      <option value="">All Status</option>
+      <option>In Progress</option><option>Completed</option><option>On Hold</option><option>Cancelled</option>
+    </select>
+  </div>
+  <div id="proj-grid" class="proj-grid"></div>
+</div>
+
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New Project</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="field"><label class="flbl">Project Name *</label><input class="fi" id="pj-name"></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client</label><select class="fi" id="pj-client"><option value="">— Select Client —</option></select></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="pj-status"><option>In Progress</option><option>Completed</option><option>On Hold</option><option>Cancelled</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Contract Value (AED)</label><input class="fi" id="pj-value" type="number" min="0"></div>
+      <div class="field"><label class="flbl">Progress %</label><input class="fi" id="pj-prog" type="number" min="0" max="100" value="0"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Start Date</label><input class="fi" id="pj-start" type="date"></div>
+      <div class="field"><label class="flbl">End Date</label><input class="fi" id="pj-end" type="date"></div>
+    </div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="pj-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null;
+async function main(){const ok=await initPage('projects','Projects');if(ok)render();}
+function populateClients(){const sel=document.getElementById('pj-client');const cur=sel.value;sel.innerHTML='<option value="">— Select Client —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const sf=document.getElementById('status-filter').value;
+  const list=SBR.projects.filter(p=>(!q||(p.name||'').toLowerCase().includes(q))&&(!sf||p.status===sf));
+  const el=document.getElementById('proj-grid');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏗️</div><div class="empty-state-text">No projects yet.</div></div>';return;}
+  el.innerHTML=list.map(p=>{
+    const c=SBR.clients.find(x=>x.id===p.clientId)||{name:'—'};
+    const prog=p.progress||0;
+    const statusColors={'In Progress':'#0F4C81','Completed':'#16a34a','On Hold':'#d97706','Cancelled':'#dc2626'};
+    const col=statusColors[p.status]||'#6b7280';
+    return`<div class="proj-card" onclick="openForm(${p.id})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:700;color:var(--blue)">${escH(p.name)}</div>
+        ${badgeHTML(p.status)}
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">👤 ${escH(c.name)}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span style="color:var(--text2)">Contract Value</span>
+        <span style="font-weight:700;color:var(--blue)">AED ${fmt(p.contractValue||0)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="color:var(--text2)">Progress</span>
+        <span style="font-weight:600">${prog}%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${prog}%;background:${col}"></div></div>
+      ${p.start?`<div style="font-size:10px;color:var(--text3)">📅 ${p.start}${p.end?' → '+p.end:''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function openForm(id){
+  editId=id||null;populateClients();
+  if(id){const p=SBR.projects.find(x=>x.id===id);if(!p)return;document.getElementById('modal-title').textContent='✏️ Edit Project';sv('pj-name',p.name);sv('pj-client',p.clientId||'');sv('pj-status',p.status||'In Progress');sv('pj-value',p.contractValue||0);sv('pj-prog',p.progress||0);sv('pj-start',p.start||'');sv('pj-end',p.end||'');sv('pj-notes',p.notes||'');}
+  else{document.getElementById('modal-title').textContent='+ New Project';['pj-name','pj-notes'].forEach(i=>sv(i,''));sv('pj-client','');sv('pj-status','In Progress');sv('pj-value',0);sv('pj-prog',0);sv('pj-start',td());sv('pj-end','');}
+  document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const name=gv('pj-name').trim();if(!name){showToast('Name required','error');return;}
+  const obj={name,clientId:parseInt(gv('pj-client'))||null,status:gv('pj-status'),contractValue:parseFloat(gv('pj-value'))||0,progress:parseInt(gv('pj-prog'))||0,start:gv('pj-start'),end:gv('pj-end'),notes:gv('pj-notes')};
+  if(editId){const p=SBR.projects.find(x=>x.id===editId);if(p)Object.assign(p,obj);}
+  else SBR.projects.push({id:SBR.projIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Project saved!');
+}
+main();
+</script>
+</body>
+</html>

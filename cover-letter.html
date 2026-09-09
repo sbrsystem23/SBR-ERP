@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Cover Letter</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">✉️ Cover Letter Template</div><button class="btn btn-p" onclick="save()">💾 Save</button></div>
+  <div class="card">
+    <div class="card-title">Default Cover Letter Settings</div>
+    <div class="field"><label class="flbl">Salutation</label><input class="fi" id="cl-salutation" value="Dear Sir/Madam,"></div>
+    <div class="field"><label class="flbl">Opening Line</label><input class="fi" id="cl-openline" placeholder="Leave blank for auto: Greetings from [Company Name]"></div>
+    <div class="field"><label class="flbl">Greeting / Introduction Paragraph</label><textarea class="fi" id="cl-greeting" rows="4" placeholder="We are pleased to submit our quotation..."></textarea></div>
+    <div class="field"><label class="flbl">About SBR System — Why Choose Us</label><textarea class="fi" id="cl-about" rows="4" placeholder="SBR System is a leading smart home automation company..."></textarea></div>
+    <div class="field"><label class="flbl">Certifications & Credentials</label><textarea class="fi" id="cl-certs" rows="3" placeholder="KNX Certified Partner · Control4 Authorized Dealer..."></textarea></div>
+    <div class="field"><label class="flbl">Closing Statement</label><textarea class="fi" id="cl-closing" rows="3" placeholder="Please review the detailed scope and commercial summary..."></textarea></div>
+    <div class="card-title" style="margin-top:16px">✍️ Signature</div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Signatory Name</label><input class="fi" id="cl-sig-name" value="Bilal Ashraf"></div>
+      <div class="field"><label class="flbl">Signatory Title</label><input class="fi" id="cl-sig-title" value="Authorised Signatory"></div>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+async function main(){
+  const ok=await initPage('cover-letter','Cover Letter');
+  if(!ok)return;
+  const cl=SBR.coverLetter||{};
+  sv('cl-salutation',cl.salutation||'Dear Sir/Madam,');sv('cl-openline',cl.openline||'');
+  sv('cl-greeting',cl.greeting||'');sv('cl-about',cl.about||'');sv('cl-certs',cl.certs||'');sv('cl-closing',cl.closing||'');
+  sv('cl-sig-name',cl.sigName||'Bilal Ashraf');sv('cl-sig-title',cl.sigTitle||'Authorised Signatory');
+}
+function save(){
+  SBR.coverLetter={salutation:gv('cl-salutation'),openline:gv('cl-openline'),greeting:gv('cl-greeting'),about:gv('cl-about'),certs:gv('cl-certs'),closing:gv('cl-closing'),sigName:gv('cl-sig-name'),sigTitle:gv('cl-sig-title')};
+  saveAllData();showToast('✅ Cover letter saved!');
+}
+main();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — AMC Quotation</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
+<div class="main">
+  <div class="page-hdr"><div class="page-title">🔄 AMC Quotations</div><button class="btn btn-p" onclick="openForm()">+ New AMC Quotation</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-bar" id="search" placeholder="Search AMC quotations..." oninput="render()" style="max-width:280px">
+    <select class="fi" id="status-filter" onchange="render()" style="max-width:150px"><option value="">All Status</option><option>Draft</option><option>Sent</option><option>Approved</option><option>Rejected</option></select>
+  </div>
+  <div id="list" class="list-wrap"></div>
+</div>
+<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New AMC Quotation</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">AMC Quotation No.</label><input class="fi" id="af-num"></div>
+      <div class="field"><label class="flbl">Date</label><input class="fi" id="af-date" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Client *</label><select class="fi" id="af-client"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="flbl">Status</label><select class="fi" id="af-status"><option>Draft</option><option>Sent</option><option>Approved</option><option>Rejected</option></select></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">Site / Location</label><input class="fi" id="af-site"></div>
+      <div class="field"><label class="flbl">AMC Duration</label><select class="fi" id="af-duration"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option></select></div>
+    </div>
+    <div class="card-title" style="margin:10px 0 6px">📅 Visit Plan</div>
+    <div class="fg4">
+      <div class="field"><label class="flbl">Preventive Visits/Year</label><input class="fi" id="af-major" type="number" value="4" min="0"></div>
+      <div class="field"><label class="flbl">Minor Visits/Year</label><input class="fi" id="af-minor" type="number" value="0" min="0"></div>
+      <div class="field"><label class="flbl">Emergency Visits/Year</label><input class="fi" id="af-emergency" type="number" value="16" min="0"></div>
+      <div class="field"><label class="flbl">Remote Support</label><input class="fi" id="af-remote" value="Unlimited"></div>
+    </div>
+    <div class="fg2">
+      <div class="field"><label class="flbl">AMC Price (excl. VAT)</label><input class="fi" id="af-price" type="number" min="0" step="0.01"></div>
+      <div class="field"><label class="flbl">VAT %</label><input class="fi" id="af-vat" type="number" value="5"></div>
+    </div>
+    <div class="field"><label class="flbl">Payment Terms</label><textarea class="fi" id="af-payterms" rows="2" placeholder="e.g. 50% advance upon signing..."></textarea></div>
+    <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="af-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="save()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+let editId=null;
+async function main(){const ok=await initPage('amc','AMC Quotations');if(ok)render();}
+function populateClients(){const sel=document.getElementById('af-client');const cur=sel.value;sel.innerHTML='<option value="">— Select —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
+function calcTotal(){const price=parseFloat(gv('af-price'))||0;const vat=parseFloat(gv('af-vat'))||0;return price*(1+vat/100);}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();const sf=document.getElementById('status-filter').value;
+  const list=SBR.amcQuotations.filter(a=>(!q||(a.num||'').toLowerCase().includes(q))&&(!sf||a.status===sf)).sort((a,b)=>b.id-a.id);
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔄</div><div class="empty-state-text">No AMC quotations yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Ref No.</th><th>Client</th><th>Site</th><th>Date</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(a=>{const c=SBR.clients.find(x=>x.id===a.clientId)||{name:'—'};const price=parseFloat(a.price)||0;const vat=parseFloat(a.vat)||5;const total=price*(1+vat/100);return`<tr onclick="openForm(${a.id})" style="cursor:pointer">
+    <td style="font-weight:600">${escH(a.num||'—')}</td><td>${escH(c.name)}</td><td style="font-size:11px;color:var(--text2)">${escH(a.site||'—')}</td>
+    <td>${formatDate(a.date)}</td><td style="font-weight:700;color:var(--blue)">AED ${fmt(total)}</td><td>${badgeHTML(a.status)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${a.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${a.id})">✕</button>
+    </div></td>
+  </tr>`;}).join('')+'</tbody></table>';
+}
+function openForm(id){
+  editId=id||null;populateClients();
+  const num='QT-AMC-26-0'+SBR.amcQIdCtr;
+  if(id){const a=SBR.amcQuotations.find(x=>x.id===id);if(!a)return;document.getElementById('modal-title').textContent='✏️ Edit AMC Quotation';sv('af-num',a.num);sv('af-date',a.date);sv('af-client',a.clientId||'');sv('af-status',a.status||'Draft');sv('af-site',a.site||'');sv('af-duration',a.duration||1);sv('af-major',a.major||4);sv('af-minor',a.minor||0);sv('af-emergency',a.emergency||16);sv('af-remote',a.remote||'Unlimited');sv('af-price',a.price||0);sv('af-vat',a.vat||5);sv('af-payterms',a.payterms||'');sv('af-notes',a.notes||'');}
+  else{document.getElementById('modal-title').textContent='+ New AMC Quotation';sv('af-num',num);sv('af-date',td());sv('af-client','');sv('af-status','Draft');sv('af-site','');sv('af-duration',1);sv('af-major',4);sv('af-minor',0);sv('af-emergency',16);sv('af-remote','Unlimited (within working hours)');sv('af-price',0);sv('af-vat',5);sv('af-payterms','50% advance upon signing. Remaining 50% after 6 months.');sv('af-notes','');}
+  document.getElementById('modal').style.display='flex';
+}
+function save(){
+  const price=parseFloat(gv('af-price'))||0;const vatPct=parseFloat(gv('af-vat'))||5;
+  const obj={num:gv('af-num')||'QT-AMC-26-0'+SBR.amcQIdCtr,date:gv('af-date'),clientId:parseInt(gv('af-client'))||null,status:gv('af-status'),site:gv('af-site'),duration:gv('af-duration'),major:gv('af-major'),minor:gv('af-minor'),emergency:gv('af-emergency'),remote:gv('af-remote'),price,vat:vatPct,total:price*(1+vatPct/100),payterms:gv('af-payterms'),notes:gv('af-notes')};
+  if(editId){const a=SBR.amcQuotations.find(x=>x.id===editId);if(a)Object.assign(a,obj);}
+  else SBR.amcQuotations.push({id:SBR.amcQIdCtr++,...obj});
+  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ AMC Quotation saved!');
+}
+function del(id){if(!confirm('Delete?'))return;SBR.amcQuotations=SBR.amcQuotations.filter(x=>x.id!==id);saveAllData();render();}
+main();
+</script>
+</body>
+</html>

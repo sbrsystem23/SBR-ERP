@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════
+   SBR ERP Cloud — Shared Styles
+═══════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#0F4C81;--blue-lt:#e0eeff;--teal:#0891b2;
+  --green:#16a34a;--amber:#d97706;--red:#dc2626;
+  --border:#e2e8f0;--surface:#f8fafc;--surface2:#f1f5f9;
+  --text:#1a202c;--text2:#6b7280;--text3:#9ca3af;
+  --sidebar-w:168px;--topbar-h:48px;
+}
+body{font-family:Arial,sans-serif;font-size:13px;color:var(--text);background:#f0f4f8;display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.sb-logo{padding:14px 16px;border-bottom:1px solid var(--border);text-align:center}
+.sb-sub{font-size:10px;color:var(--text2);margin-top:3px}
+.sb-nav{flex:1;padding:8px 0}
+.sb-section{padding:12px 12px 3px;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:1px 6px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:500;color:#374151;border:none;background:none;width:calc(100% - 12px);text-align:left;font-family:Arial,sans-serif;white-space:nowrap;transition:all .12s}
+.sb-item:hover{background:#f0f7ff;color:var(--blue)}
+.sb-item.active{background:#e0eeff;color:var(--blue);font-weight:700}
+.sb-foot{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:99}
+
+/* ── MAIN CONTENT ── */
+.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);flex:1;padding:20px;min-height:calc(100vh - var(--topbar-h))}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:10px;border:.5px solid var(--border);padding:18px;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* ── SYNC BADGE ── */
+.sync-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px}
+.sync-idle{background:#f0f7ff;color:var(--blue)}
+.sync-loading{background:#fef3c7;color:#92400e}
+.sync-saving{background:#fef3c7;color:#92400e}
+.sync-saved{background:#dcfce7;color:#166534}
+.sync-error{background:#fee2e2;color:#dc2626}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:.5px solid var(--border);background:#fff;color:var(--text);transition:all .12s}
+.btn:hover{background:var(--surface2)}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:#0d3d6b}
+.btn-g{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-r{background:#fee2e2;color:var(--red);border-color:#fca5a5}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-xs{padding:2px 7px;font-size:10px}
+
+/* ── FORM INPUTS ── */
+.fi{width:100%;padding:7px 10px;border:.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Arial,sans-serif;background:#fff;color:var(--text);outline:none;transition:border .12s}
+.fi:focus{border-color:var(--blue)}
+.field{margin-bottom:10px}
+.flbl{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* ── LIST ITEMS ── */
+.list-item{display:flex;align-items:center;padding:10px 14px;border-bottom:.5px solid var(--border);transition:background .1s;cursor:pointer}
+.list-item:hover{background:var(--surface)}
+.list-item:last-child{border-bottom:none}
+.list-wrap{background:#fff;border-radius:10px;border:.5px solid var(--border);overflow:hidden}
+
+/* ── STATS CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:10px;border:.5px solid var(--border);padding:14px 16px}
+.stat-val{font-size:20px;font-weight:800;color:var(--blue);margin:4px 0}
+.stat-lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{padding:9px 12px;background:var(--surface2);text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;border-bottom:.5px solid var(--border);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.tbl tr:hover td{background:#fafcff}
+.tbl tr:last-child td{border-bottom:none}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:500}
+.modal{background:#fff;border-radius:12px;padding:20px;width:95%;max-width:540px;max-height:90vh;overflow-y:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:14px;font-weight:700;color:var(--blue)}
+
+/* ── TOAST ── */
+.sbr-toast{position:fixed;bottom:24px;right:24px;background:#1a202c;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.sbr-toast.show{opacity:1;transform:translateY(0)}
+.sbr-toast.toast-error{background:var(--red)}
+
+/* ── PAGE HEADER ── */
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.page-title{font-size:18px;font-weight:800;color:var(--blue)}
+
+/* ── SEARCH BAR ── */
+.search-bar{width:100%;padding:9px 14px 9px 36px;border:.5px solid var(--border);border-radius:8px;font-size:12px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") 10px center no-repeat;outline:none}
+.search-bar:focus{border-color:var(--blue)}
+
+/* ── LOGIN PAGE ── */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F4C81,#1e6fb5)}
+.login-card{background:#fff;border-radius:16px;padding:36px 32px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-title{font-size:20px;font-weight:800;color:var(--blue);text-align:center;margin-bottom:4px}
+.login-sub{font-size:11px;color:var(--text2);text-align:center;margin-bottom:24px}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px;text-align:center;color:var(--text2)}
+.empty-state-icon{font-size:36px;margin-bottom:10px}
+.empty-state-text{font-size:13px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:8px;width:fit-content}
+.tab{padding:6px 16px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);transition:all .12s}
+.tab.active{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .topbar{left:0}
+  .fg2,.fg3,.fg4{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ── SIDEBAR TOGGLE ── */
+.sidebar{transition:width .2s ease}
+.sidebar.collapsed{width:0;overflow:hidden;padding:0}
+.sidebar.collapsed + * .main,
+body.sb-collapsed .main{margin-left:0}
+body.sb-collapsed .topbar{left:0}
+.sb-toggle{position:fixed;top:12px;left:12px;z-index:200;background:#fff;border:.5px solid var(--border);border-radius:7px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:left .2s}
+body:not(.sb-collapsed) .sb-toggle{left:180px}
