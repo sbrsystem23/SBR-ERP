@@ -62,6 +62,32 @@ async function main() {
   });
 }
 
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const cf = document.getElementById('cat-filter');
+  const cats = [...new Set(SBR.productDB.map(p=>p.cat||'').filter(Boolean))];
+  const curCat = cf.value;
+  cf.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option value="${c}"${c===curCat?' selected':''}>${c}</option>`).join('');
+  const dl = document.getElementById('cat-list');
+  if(dl) dl.innerHTML = cats.map(c=>`<option value="${c}">`).join('');
+  const list = SBR.productDB.filter(p => (!q||(p.name||'').toLowerCase().includes(q)||(p.model||'').toLowerCase().includes(q)) && (!cat||p.cat===cat));
+  const el = document.getElementById('list');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No products yet.</div></div>';return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Product</th><th>Model</th><th>Category</th><th>Cost</th><th>Sell Price</th><th>Actions</th></tr></thead><tbody>`+
+  list.map(p=>`<tr onclick="openForm(${p.id})" style="cursor:pointer">
+    <td><div style="font-weight:600">${escH(p.name)}</div>${p.brand?`<div style="font-size:10px;color:var(--text2)">${escH(p.brand)}</div>`:''}</td>
+    <td style="font-size:11px">${escH(p.model||'—')}</td>
+    <td><span style="background:var(--blue-lt);color:var(--blue);padding:2px 7px;border-radius:8px;font-size:10px">${escH(p.cat||'—')}</span></td>
+    <td style="font-size:12px">AED ${fmt(p.cost||0)}</td>
+    <td style="font-size:12px;font-weight:700;color:var(--blue)">AED ${fmt(p.sell||0)}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${p.id})">✏️</button>
+      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${p.id})">✕</button>
+    </div></td>
+  </tr>`).join('')+'</tbody></table>';
+}
+
 function openForm(id) {
   editId=id||null;
   if(id){const p=SBR.productDB.find(x=>x.id===id);if(!p)return;document.getElementById('modal-title').textContent='✏️ Edit Product';sv('pf-name',p.name);sv('pf-model',p.model||'');sv('pf-cat',p.cat||'');sv('pf-brand',p.brand||'');sv('pf-desc',p.desc||'');sv('pf-cost',p.cost||0);sv('pf-sell',p.sell||0);sv('pf-vat',p.vat||5);sv('pf-maxdisc',p.maxDisc||20);sv('pf-defdisc',p.defDisc||0);}

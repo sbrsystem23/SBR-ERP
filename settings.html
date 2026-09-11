@@ -93,8 +93,9 @@
 window.addEventListener("load",function(){main();});
 async function main() {
   await initPage('settings', 'Settings & Categories', function() {
-    if (typeof render === 'function') render();
+    if (typeof loadCompany === 'function') loadCompany();
   });
+});
 }
 
 function loadCompany() {
