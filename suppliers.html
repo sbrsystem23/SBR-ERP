@@ -49,24 +49,10 @@
 <script>
 window.addEventListener("load",function(){main();});
 let editId = null;
-async function main() { const ok = await initPage('suppliers','Suppliers'); if(ok) render(); }
-
-function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const list = SBR.suppliers.filter(s => !q || s.name.toLowerCase().includes(q) || (s.contact||'').toLowerCase().includes(q));
-  const el = document.getElementById('list');
-  if (!list.length) { el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏭</div><div class="empty-state-text">No suppliers yet.</div></div>'; return; }
-  el.innerHTML = list.map(s => `<div class="list-item" onclick="openForm(${s.id})">
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:600;color:var(--blue)">${escH(s.name)}</div>
-      <div style="font-size:11px;color:var(--text2)">${s.contact?'👤 '+escH(s.contact)+' · ':''}${s.phone?'📞 '+escH(s.phone):''}</div>
-      ${s.email?`<div style="font-size:10px;color:var(--text3)">✉️ ${escH(s.email)}</div>`:''}
-    </div>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openForm(${s.id})">✏️</button>
-      <button class="btn btn-xs btn-r" onclick="event.stopPropagation();del(${s.id})">✕</button>
-    </div>
-  </div>`).join('');
+async function main() {
+  await initPage('suppliers', 'Suppliers', function() {
+    if (typeof render === 'function') render();
+  });
 }
 
 function openForm(id) {

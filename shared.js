@@ -311,7 +311,7 @@ function buildTopbar(title) {
 }
 
 // ── PAGE INIT ─────────────────────────────────────
-async function initPage(pageId, title) {
+async function initPage(pageId, title, onReady) {
   try {
     const user = checkAuth();
     if (!user) return false;
@@ -319,9 +319,11 @@ async function initPage(pageId, title) {
     buildSidebar(pageId);
     setTimeout(applySavedSidebarState, 50);
     await loadFromSheet();
+    if (typeof onReady === 'function') onReady();
     return true;
   } catch(e) {
     console.error('initPage error:', e);
+    if (typeof onReady === 'function') onReady();
     return true;
   }
 }

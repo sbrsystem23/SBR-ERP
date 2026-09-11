@@ -92,8 +92,9 @@
 <script>
 window.addEventListener("load",function(){main();});
 async function main() {
-  const ok = await initPage('settings','Settings & Categories');
-  if (ok) { loadCompany(); renderCategories(); renderKeyTerms(); }
+  await initPage('settings', 'Settings & Categories', function() {
+    if (typeof render === 'function') render();
+  });
 }
 
 function loadCompany() {

@@ -78,8 +78,9 @@ window.addEventListener("load",function(){main();});
 let editId = null;
 
 async function main() {
-  const ok = await initPage('clients', 'Clients');
-  if (ok) render();
+  await initPage('clients', 'Clients', function() {
+    if (typeof render === 'function') render();
+  });
 }
 
 function render() {

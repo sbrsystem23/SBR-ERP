@@ -91,15 +91,11 @@
 
 <script src="shared.js"></script>
 <script>
-window.addEventListener('load', function() { main(); });
+window.addEventListener('load', async function() { await main(); if(typeof render==='function')render(); else if(typeof renderDash==='function')renderDash(); });
 async function main() {
-  try {
-    const ok = await initPage('dashboard', 'Dashboard');
-    if (ok) renderDash();
-  } catch(e) {
-    console.error('Dashboard error:', e);
-    document.getElementById('dash-stats').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
-  }
+  await initPage('dashboard', 'Dashboard', function() {
+    if (typeof renderDash === 'function') renderDash();
+  });
 }
 
 function renderDash() {

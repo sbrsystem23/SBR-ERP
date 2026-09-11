@@ -64,8 +64,9 @@ window.addEventListener("load",function(){main();});
 let editApptId = null;
 
 async function main() {
-  const ok = await initPage('appointments', 'Appointments');
-  if (ok) renderAppts();
+  await initPage('appointments', 'Appointments', function() {
+    if (typeof render === 'function') render();
+  });
 }
 
 function renderAppts() {
