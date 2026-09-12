@@ -1,18 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SBR ERP — Projects</title><link rel="stylesheet" href="shared.css">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBR ERP — Projects</title>
+<link rel="stylesheet" href="shared.css">
 <style>
 .proj-card{background:#fff;border-radius:10px;border:.5px solid var(--border);padding:16px;cursor:pointer;transition:all .15s}
 .proj-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-2px)}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.prog-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:8px 0}
-.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
+.prog-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:6px 0 4px}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px}
+/* Detail view */
+.proj-detail{display:none;position:fixed;inset:0;background:#f0f4f8;z-index:200;overflow-y:auto;padding:0}
+.proj-detail.open{display:block}
+.proj-detail-topbar{background:#fff;border-bottom:.5px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.proj-tabs{display:flex;gap:2px;overflow-x:auto;background:#fff;border-bottom:.5px solid var(--border);padding:0 20px}
+.proj-tab{padding:10px 14px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;white-space:nowrap;transition:all .12s}
+.proj-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.proj-tab-content{display:none;padding:20px}
+.proj-tab-content.active{display:block}
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-box{background:#fff;border-radius:8px;border:.5px solid var(--border);padding:14px 16px}
+.stat-box-val{font-size:20px;font-weight:800;color:var(--blue)}
+.stat-box-lbl{font-size:10px;color:var(--text2);text-transform:uppercase;font-weight:600;margin-bottom:4px}
+.doc-row{display:flex;align-items:center;padding:10px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.doc-row:hover{background:var(--surface)}
+.doc-row:last-child{border-bottom:none}
 </style>
 </head>
 <body>
-<div id="sidebar-wrap"></div><div id="topbar-wrap"></div>
-<div class="main">
-  <div class="page-hdr"><div class="page-title">🏗️ Projects</div><button class="btn btn-p" onclick="openForm()">+ New Project</button></div>
+<div id="sidebar-wrap"></div>
+<div id="topbar-wrap"></div>
+
+<!-- PROJECTS LIST -->
+<div class="main" id="proj-list-view">
+  <div class="page-hdr">
+    <div class="page-title">🏗️ Projects</div>
+    <button class="btn btn-p" onclick="openNewProject()">+ New Project</button>
+  </div>
   <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
     <input class="search-bar" id="search" placeholder="Search projects..." oninput="render()" style="max-width:280px">
     <select class="fi" id="status-filter" onchange="render()" style="max-width:160px">
@@ -23,13 +49,94 @@
   <div id="proj-grid" class="proj-grid"></div>
 </div>
 
-<div class="modal-bg" id="modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+<!-- PROJECT DETAIL VIEW -->
+<div class="proj-detail" id="proj-detail">
+  <div class="proj-detail-topbar">
+    <button class="btn" onclick="closeDetail()">← Projects</button>
+    <div style="flex:1">
+      <div id="pd-title" style="font-size:15px;font-weight:700;color:var(--blue)"></div>
+      <div id="pd-subtitle" style="font-size:11px;color:var(--text2)"></div>
+    </div>
+    <select id="pd-progress" class="fi" style="max-width:120px" onchange="updateProgress(this.value)">
+      <option value="0">0%</option><option value="10">10%</option><option value="20">20%</option>
+      <option value="30">30%</option><option value="40">40%</option><option value="50">50%</option>
+      <option value="60">60%</option><option value="70">70%</option><option value="80">80%</option>
+      <option value="90">90%</option><option value="100">100%</option>
+    </select>
+    <button class="btn" onclick="openEditProject()" style="color:var(--blue)">✏️ Edit</button>
+    <button id="btn-complete" class="btn btn-g" onclick="markComplete()">✅ Mark Complete</button>
+  </div>
+
+  <!-- Stats strip -->
+  <div style="padding:16px 20px 0;background:#fff;border-bottom:.5px solid var(--border)">
+    <div class="stat-strip" id="pd-stats"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="proj-tabs">
+    <button class="proj-tab active" onclick="showTab('overview',this)">📊 Overview</button>
+    <button class="proj-tab" onclick="showTab('docs',this)">🔗 Documents</button>
+    <button class="proj-tab" onclick="showTab('invoices',this)">🧾 Invoices</button>
+    <button class="proj-tab" onclick="showTab('receipts',this)">💰 Receipts</button>
+    <button class="proj-tab" onclick="showTab('delivery',this)">📦 Delivery</button>
+    <button class="proj-tab" onclick="showTab('amc',this)">🔄 AMC</button>
+    <button class="proj-tab" onclick="showTab('notes',this)">📝 Notes</button>
+  </div>
+
+  <!-- Tab contents -->
+  <div id="tab-overview" class="proj-tab-content active">
+    <div id="pd-overview-detail"></div>
+  </div>
+  <div id="tab-docs" class="proj-tab-content">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn btn-p btn-sm" onclick="linkDocModal()">🔗 Link Existing Document</button>
+    </div>
+    <div id="pd-docs-list"></div>
+  </div>
+  <div id="tab-invoices" class="proj-tab-content"><div id="pd-inv-list"></div></div>
+  <div id="tab-receipts" class="proj-tab-content"><div id="pd-rec-list"></div></div>
+  <div id="tab-delivery" class="proj-tab-content"><div id="pd-dn-list"></div></div>
+  <div id="tab-amc" class="proj-tab-content"><div id="pd-amc-list"></div></div>
+  <div id="tab-notes" class="proj-tab-content">
+    <div class="card">
+      <div class="card-title">📝 Project Notes</div>
+      <textarea class="fi" id="pd-notes" rows="8" placeholder="Add notes..." oninput="saveNotes(this.value)" style="min-height:200px"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Link Doc Modal -->
+<div class="modal-bg" id="link-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hdr">
+      <div class="modal-title">🔗 Link Document to Project</div>
+      <button onclick="document.getElementById('link-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="field"><label class="flbl">Document Type</label>
+      <select class="fi" id="link-type" onchange="renderLinkList()">
+        <option value="inv">Invoice</option>
+        <option value="rec">Receipt</option>
+        <option value="dn">Delivery Note</option>
+        <option value="amc">AMC Quotation</option>
+      </select>
+    </div>
+    <div id="link-list" style="max-height:300px;overflow-y:auto;border:.5px solid var(--border);border-radius:6px"></div>
+  </div>
+</div>
+
+<!-- New/Edit Project Modal -->
+<div class="modal-bg" id="proj-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal" style="max-width:600px">
-    <div class="modal-hdr"><div class="modal-title" id="modal-title">+ New Project</div><button onclick="document.getElementById('modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>
+    <div class="modal-hdr">
+      <div class="modal-title" id="proj-modal-title">+ New Project</div>
+      <button onclick="document.getElementById('proj-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
     <div class="field"><label class="flbl">Project Name *</label><input class="fi" id="pj-name"></div>
     <div class="fg2">
-      <div class="field"><label class="flbl">Client</label><select class="fi" id="pj-client"><option value="">— Select Client —</option></select></div>
-      <div class="field"><label class="flbl">Status</label><select class="fi" id="pj-status"><option>In Progress</option><option>Completed</option><option>On Hold</option><option>Cancelled</option></select></div>
+      <div class="field"><label class="flbl">Client</label><select class="fi" id="pj-client"><option value="">— Select —</option></select></div>
+      <div class="field"><label class="flbl">Status</label>
+        <select class="fi" id="pj-status"><option>In Progress</option><option>Completed</option><option>On Hold</option><option>Cancelled</option></select>
+      </div>
     </div>
     <div class="fg2">
       <div class="field"><label class="flbl">Contract Value (AED)</label><input class="fi" id="pj-value" type="number" min="0"></div>
@@ -41,60 +148,329 @@
     </div>
     <div class="field"><label class="flbl">Notes</label><textarea class="fi" id="pj-notes" rows="2"></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button class="btn" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
-      <button class="btn btn-p" onclick="save()">💾 Save</button>
+      <button class="btn" onclick="document.getElementById('proj-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-p" onclick="saveProject()">💾 Save Project</button>
     </div>
   </div>
 </div>
+
 <script src="shared.js"></script>
 <script>
-window.addEventListener("load",function(){main();});
-let editId=null;
-async function main(){const ok=await initPage('projects','Projects');if(ok)render();}
-function populateClients(){const sel=document.getElementById('pj-client');const cur=sel.value;sel.innerHTML='<option value="">— Select Client —</option>'+SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');if(cur)sel.value=cur;}
-function render(){
-  const q=document.getElementById('search').value.toLowerCase();
-  const sf=document.getElementById('status-filter').value;
-  const list=SBR.projects.filter(p=>(!q||(p.name||'').toLowerCase().includes(q))&&(!sf||p.status===sf));
-  const el=document.getElementById('proj-grid');
-  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏗️</div><div class="empty-state-text">No projects yet.</div></div>';return;}
-  el.innerHTML=list.map(p=>{
-    const c=SBR.clients.find(x=>x.id===p.clientId)||{name:'—'};
-    const prog=p.progress||0;
-    const statusColors={'In Progress':'#0F4C81','Completed':'#16a34a','On Hold':'#d97706','Cancelled':'#dc2626'};
-    const col=statusColors[p.status]||'#6b7280';
-    return`<div class="proj-card" onclick="openForm(${p.id})">
+let currentProjId = null;
+let editProjId = null;
+
+async function main() {
+  await initPage('projects', 'Projects', function() {
+    render();
+  });
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const sf = document.getElementById('status-filter').value;
+  const list = SBR.projects.filter(p =>
+    (!q || (p.name||'').toLowerCase().includes(q) || (SBR.clients.find(c=>c.id===p.clientId)||{name:''}).name.toLowerCase().includes(q)) &&
+    (!sf || p.status === sf)
+  ).sort((a,b) => b.id - a.id);
+
+  const el = document.getElementById('proj-grid');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏗️</div><div class="empty-state-text">No projects yet. Click "+ New Project" to create one.</div></div>';
+    return;
+  }
+
+  el.innerHTML = list.map(p => {
+    const c = SBR.clients.find(x => x.id === p.clientId) || {name:'—'};
+    const prog = p.progress || 0;
+    const statusColors = {'In Progress':'#0F4C81','Completed':'#16a34a','On Hold':'#d97706','Cancelled':'#dc2626'};
+    const col = statusColors[p.status] || '#6b7280';
+    // Count linked docs
+    const invCount = SBR.invoices.filter(i => i.projectId === p.id).length;
+    const recCount = SBR.receipts.filter(r => r.projectId === p.id).length;
+    return `<div class="proj-card" onclick="openDetail(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--blue)">${escH(p.name)}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--blue);line-height:1.3">${escH(p.name)}</div>
         ${badgeHTML(p.status)}
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">👤 ${escH(c.name)}</div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">👤 ${escH(c.name)}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
         <span style="color:var(--text2)">Contract Value</span>
-        <span style="font-weight:700;color:var(--blue)">AED ${fmt(p.contractValue||0)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-        <span style="color:var(--text2)">Progress</span>
-        <span style="font-weight:600">${prog}%</span>
+        <span style="font-weight:700;color:var(--blue)">AED ${fmt(p.value||0)}</span>
       </div>
       <div class="prog-bar"><div class="prog-fill" style="width:${prog}%;background:${col}"></div></div>
-      ${p.start?`<div style="font-size:10px;color:var(--text3)">📅 ${p.start}${p.end?' → '+p.end:''}</div>`:''}
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2)">
+        <span>${p.start||'—'}${p.end?' → '+p.end:''}</span>
+        <span>${prog}% · ${invCount} inv · ${recCount} rec</span>
+      </div>
     </div>`;
   }).join('');
 }
-function openForm(id){
-  editId=id||null;populateClients();
-  if(id){const p=SBR.projects.find(x=>x.id===id);if(!p)return;document.getElementById('modal-title').textContent='✏️ Edit Project';sv('pj-name',p.name);sv('pj-client',p.clientId||'');sv('pj-status',p.status||'In Progress');sv('pj-value',p.contractValue||0);sv('pj-prog',p.progress||0);sv('pj-start',p.start||'');sv('pj-end',p.end||'');sv('pj-notes',p.notes||'');}
-  else{document.getElementById('modal-title').textContent='+ New Project';['pj-name','pj-notes'].forEach(i=>sv(i,''));sv('pj-client','');sv('pj-status','In Progress');sv('pj-value',0);sv('pj-prog',0);sv('pj-start',td());sv('pj-end','');}
-  document.getElementById('modal').style.display='flex';
+
+function openDetail(id) {
+  currentProjId = id;
+  const p = SBR.projects.find(x => x.id === id);
+  if (!p) return;
+  const c = SBR.clients.find(x => x.id === p.clientId) || {name:'—'};
+
+  document.getElementById('pd-title').textContent = p.name;
+  document.getElementById('pd-subtitle').textContent = c.name + (p.start ? ' · Started: ' + p.start : '');
+  document.getElementById('pd-progress').value = String(p.progress || 0);
+
+  const btn = document.getElementById('btn-complete');
+  if (p.status === 'Completed') {
+    btn.textContent = '🔄 Reopen'; btn.style.background = '#6b7280'; btn.style.borderColor = '#6b7280';
+  } else {
+    btn.textContent = '✅ Mark Complete'; btn.style.background = '#16a34a'; btn.style.borderColor = '#16a34a';
+  }
+
+  document.getElementById('proj-detail').classList.add('open');
+  document.getElementById('proj-list-view').style.display = 'none';
+  showTab('overview', document.querySelector('.proj-tab'));
 }
-function save(){
-  const name=gv('pj-name').trim();if(!name){showToast('Name required','error');return;}
-  const obj={name,clientId:parseInt(gv('pj-client'))||null,status:gv('pj-status'),contractValue:parseFloat(gv('pj-value'))||0,progress:parseInt(gv('pj-prog'))||0,start:gv('pj-start'),end:gv('pj-end'),notes:gv('pj-notes')};
-  if(editId){const p=SBR.projects.find(x=>x.id===editId);if(p)Object.assign(p,obj);}
+
+function closeDetail() {
+  document.getElementById('proj-detail').classList.remove('open');
+  document.getElementById('proj-list-view').style.display = '';
+  currentProjId = null;
+}
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.proj-tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.proj-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  if (tab === 'overview') renderOverview();
+  else if (tab === 'docs') renderDocs();
+  else if (tab === 'invoices') renderInvoices();
+  else if (tab === 'receipts') renderReceipts();
+  else if (tab === 'delivery') renderDelivery();
+  else if (tab === 'amc') renderAMC();
+  else if (tab === 'notes') {
+    const p = getProj();
+    if (p) document.getElementById('pd-notes').value = p.notes || '';
+  }
+}
+
+function getProj() { return SBR.projects.find(x => x.id === currentProjId); }
+
+function renderOverview() {
+  const p = getProj(); if (!p) return;
+  const invs = SBR.invoices.filter(i => i.projectId === p.id);
+  const recs = SBR.receipts.filter(r => r.projectId === p.id);
+  const invoiced = invs.reduce((s,i) => s + (i.items||[]).reduce((ss,it) => ss+(it.qty||1)*(it.price||0)*(1+(it.vat||0)/100),0), 0);
+  const collected = recs.reduce((s,r) => s + (r.amount||0), 0);
+  const pending = invoiced - collected;
+  const prog = p.progress || 0;
+  const col = p.status==='In Progress'?'var(--blue)':p.status==='Completed'?'#16a34a':'#6b7280';
+
+  document.getElementById('pd-stats').innerHTML = `
+    <div class="stat-box">
+      <div class="stat-box-lbl">Contract Value</div>
+      <div class="stat-box-val">AED ${fmt(p.value||0)}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-box-lbl">Invoiced</div>
+      <div class="stat-box-val" style="color:#7c3aed">AED ${fmt(invoiced)}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-box-lbl">Collected</div>
+      <div class="stat-box-val" style="color:#16a34a">AED ${fmt(collected)}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-box-lbl">Outstanding</div>
+      <div class="stat-box-val" style="color:${pending>0?'#dc2626':'#16a34a'}">AED ${fmt(pending)}</div>
+    </div>`;
+
+  document.getElementById('pd-overview-detail').innerHTML = `
+    <div class="card">
+      <div class="card-title">📊 Project Summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Client</div><div style="font-weight:600">${escH((SBR.clients.find(x=>x.id===p.clientId)||{name:'—'}).name)}</div></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Status</div>${badgeHTML(p.status)}</div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Start Date</div><div>${p.start||'—'}</div></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px">End Date</div><div>${p.end||'—'}</div></div>
+        <div style="grid-column:1/-1">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Progress: <strong>${prog}%</strong></div>
+          <div class="prog-bar" style="height:10px"><div class="prog-fill" style="width:${prog}%;background:${col}"></div></div>
+        </div>
+      </div>
+      ${p.notes?`<div style="margin-top:12px;padding-top:12px;border-top:.5px solid var(--border);font-size:11px;color:var(--text2)">${escH(p.notes)}</div>`:''}
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Recent Activity</div>
+      ${renderActivity(p)}
+    </div>`;
+}
+
+function renderActivity(p) {
+  const invs = SBR.invoices.filter(i => i.projectId === p.id).slice(-3);
+  const recs = SBR.receipts.filter(r => r.projectId === p.id).slice(-3);
+  if (!invs.length && !recs.length) return '<div style="color:var(--text2);font-size:11px">No linked documents yet. Use the Documents tab to link invoices and receipts.</div>';
+  return [...invs.map(i => `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(i.num)}</div><div style="font-size:10px;color:var(--text2)">${i.date}</div></div>${badgeHTML(i.status)}</div>`),
+          ...recs.map(r => `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(r.num)}</div><div style="font-size:10px;color:var(--text2)">${r.date}</div></div><div style="font-weight:700;color:#16a34a">AED ${fmt(r.amount)}</div></div>`)].join('');
+}
+
+function renderDocs() {
+  const p = getProj(); if (!p) return;
+  const el = document.getElementById('pd-docs-list');
+
+  function docSection(title, items) {
+    if (!items.length) return `<div style="margin-bottom:16px"><div style="font-weight:700;color:var(--blue);margin-bottom:6px">${title}</div><div style="font-size:11px;color:var(--text2);font-style:italic">None linked.</div></div>`;
+    return `<div style="margin-bottom:16px"><div style="font-weight:700;color:var(--blue);margin-bottom:6px">${title}</div><div class="list-wrap">${items.join('')}</div></div>`;
+  }
+
+  const invRows = SBR.invoices.filter(i=>i.projectId===p.id).map(i =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(i.num)}</div><div style="font-size:10px;color:var(--text2)">${i.date} · AED ${fmt((i.items||[]).reduce((s,it)=>s+(it.qty||1)*(it.price||0),0))}</div></div>${badgeHTML(i.status)}<button onclick="unlinkDoc('inv',${i.id})" class="btn btn-xs btn-r" style="margin-left:8px">✕</button></div>`);
+
+  const recRows = SBR.receipts.filter(r=>r.projectId===p.id).map(r =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(r.num)}</div><div style="font-size:10px;color:var(--text2)">${r.date}</div></div><div style="font-weight:700;color:#16a34a;margin-right:8px">AED ${fmt(r.amount)}</div><button onclick="unlinkDoc('rec',${r.id})" class="btn btn-xs btn-r">✕</button></div>`);
+
+  const dnRows = SBR.deliveryNotes.filter(d=>d.projectId===p.id).map(d =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(d.num)}</div><div style="font-size:10px;color:var(--text2)">${d.date}</div></div>${badgeHTML(d.status)}<button onclick="unlinkDoc('dn',${d.id})" class="btn btn-xs btn-r" style="margin-left:8px">✕</button></div>`);
+
+  const amcRows = SBR.amcQuotations.filter(a=>a.projectId===p.id).map(a =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:12px;font-weight:600">${escH(a.num)}</div><div style="font-size:10px;color:var(--text2)">${a.date}</div></div>${badgeHTML(a.status)}<button onclick="unlinkDoc('amc',${a.id})" class="btn btn-xs btn-r" style="margin-left:8px">✕</button></div>`);
+
+  el.innerHTML = docSection('🧾 Invoices', invRows) + docSection('💰 Receipts', recRows) + docSection('📦 Delivery Notes', dnRows) + docSection('🔄 AMC Quotations', amcRows);
+}
+
+function renderInvoices() {
+  const p = getProj(); if (!p) return;
+  const list = SBR.invoices.filter(i => i.projectId === p.id);
+  const el = document.getElementById('pd-inv-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">No invoices linked to this project.</div></div>'; return; }
+  el.innerHTML = `<div class="list-wrap">` + list.map(i => {
+    const total = (i.items||[]).reduce((s,it)=>s+(it.qty||1)*(it.price||0)*(1+(it.vat||0)/100),0);
+    return `<div class="doc-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${escH(i.num)}</div><div style="font-size:11px;color:var(--text2)">${i.date} · ${i.invType||'PI'}</div></div><div style="font-weight:700;color:var(--blue);margin-right:12px">AED ${fmt(total)}</div>${badgeHTML(i.status)}</div>`;
+  }).join('') + '</div>';
+}
+
+function renderReceipts() {
+  const p = getProj(); if (!p) return;
+  const list = SBR.receipts.filter(r => r.projectId === p.id);
+  const el = document.getElementById('pd-rec-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">No receipts linked to this project.</div></div>'; return; }
+  el.innerHTML = `<div class="list-wrap">` + list.map(r =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${escH(r.num)}</div><div style="font-size:11px;color:var(--text2)">${r.date} · ${r.method||'—'}</div></div><div style="font-weight:700;color:#16a34a">AED ${fmt(r.amount)}</div></div>`
+  ).join('') + '</div>';
+}
+
+function renderDelivery() {
+  const p = getProj(); if (!p) return;
+  const list = SBR.deliveryNotes.filter(d => d.projectId === p.id);
+  const el = document.getElementById('pd-dn-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">No delivery notes linked.</div></div>'; return; }
+  el.innerHTML = `<div class="list-wrap">` + list.map(d =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${escH(d.num)}</div><div style="font-size:11px;color:var(--text2)">${d.date} · ${(d.items||[]).length} items</div></div>${badgeHTML(d.status)}</div>`
+  ).join('') + '</div>';
+}
+
+function renderAMC() {
+  const p = getProj(); if (!p) return;
+  const list = SBR.amcQuotations.filter(a => a.projectId === p.id);
+  const el = document.getElementById('pd-amc-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">No AMC quotations linked.</div></div>'; return; }
+  el.innerHTML = `<div class="list-wrap">` + list.map(a =>
+    `<div class="doc-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${escH(a.num)}</div><div style="font-size:11px;color:var(--text2)">${a.date} · AED ${fmt(parseFloat(a.price||0)*(1+(parseFloat(a.vat||5)/100)))}</div></div>${badgeHTML(a.status)}</div>`
+  ).join('') + '</div>';
+}
+
+function unlinkDoc(type, id) {
+  if (!confirm('Remove from project? Document will not be deleted.')) return;
+  const maps = {inv:'invoices',rec:'receipts',dn:'deliveryNotes',amc:'amcQuotations'};
+  const arr = SBR[maps[type]];
+  const doc = arr.find(x => x.id === id);
+  if (doc) delete doc.projectId;
+  saveAllData(); renderDocs(); showToast('Unlinked');
+}
+
+function linkDocModal() {
+  document.getElementById('link-modal').style.display = 'flex';
+  renderLinkList();
+}
+
+function renderLinkList() {
+  const p = getProj(); if (!p) return;
+  const type = document.getElementById('link-type').value;
+  const maps = {inv:'invoices',rec:'receipts',dn:'deliveryNotes',amc:'amcQuotations'};
+  const items = SBR[maps[type]].filter(x => !x.projectId || x.projectId !== p.id);
+  const el = document.getElementById('link-list');
+  if (!items.length) { el.innerHTML = '<div style="padding:16px;font-size:11px;color:var(--text2);text-align:center">No unlinked documents found.</div>'; return; }
+  el.innerHTML = items.map(item => {
+    const label = item.num || item.date || '—';
+    const client = SBR.clients.find(c => c.id === item.clientId) || {name:'—'};
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:.5px solid var(--border);font-size:11px">
+      <span>${escH(label)} — ${escH(client.name)}</span>
+      <button class="btn btn-xs btn-p" onclick="linkDoc('${type}',${item.id})">Link</button>
+    </div>`;
+  }).join('');
+}
+
+function linkDoc(type, id) {
+  const p = getProj(); if (!p) return;
+  const maps = {inv:'invoices',rec:'receipts',dn:'deliveryNotes',amc:'amcQuotations'};
+  const doc = SBR[maps[type]].find(x => x.id === id);
+  if (doc) doc.projectId = p.id;
+  saveAllData(); renderLinkList(); renderDocs(); showToast('✅ Linked!');
+}
+
+function updateProgress(val) {
+  const p = getProj(); if (!p) return;
+  p.progress = parseInt(val);
+  saveAllData(); showToast('Progress updated');
+}
+
+function saveNotes(val) {
+  const p = getProj(); if (!p) return;
+  p.notes = val;
+  saveAllData();
+}
+
+function markComplete() {
+  const p = getProj(); if (!p) return;
+  if (p.status === 'Completed') {
+    p.status = 'In Progress'; p.progress = 0;
+  } else {
+    if (!confirm('Mark project as Complete?')) return;
+    p.status = 'Completed'; p.progress = 100;
+  }
+  saveAllData(); openDetail(p.id); showToast('✅ Updated!');
+}
+
+function openNewProject() {
+  editProjId = null;
+  document.getElementById('proj-modal-title').textContent = '+ New Project';
+  ['pj-name','pj-notes'].forEach(i=>sv(i,''));
+  sv('pj-client',''); sv('pj-status','In Progress'); sv('pj-value',0); sv('pj-prog',0); sv('pj-start',td()); sv('pj-end','');
+  // populate clients
+  const sel = document.getElementById('pj-client');
+  sel.innerHTML = '<option value="">— Select —</option>' + SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');
+  document.getElementById('proj-modal').style.display = 'flex';
+}
+
+function openEditProject() {
+  const p = getProj(); if (!p) return;
+  editProjId = p.id;
+  document.getElementById('proj-modal-title').textContent = '✏️ Edit Project';
+  const sel = document.getElementById('pj-client');
+  sel.innerHTML = '<option value="">— Select —</option>' + SBR.clients.map(c=>`<option value="${c.id}">${escH(c.name)}</option>`).join('');
+  sv('pj-name',p.name); sv('pj-client',p.clientId||''); sv('pj-status',p.status||'In Progress');
+  sv('pj-value',p.value||0); sv('pj-prog',p.progress||0); sv('pj-start',p.start||''); sv('pj-end',p.end||''); sv('pj-notes',p.notes||'');
+  document.getElementById('proj-modal').style.display = 'flex';
+}
+
+function saveProject() {
+  const name = gv('pj-name').trim(); if (!name) { showToast('Name required','error'); return; }
+  const obj = {name,clientId:parseInt(gv('pj-client'))||null,status:gv('pj-status'),value:parseFloat(gv('pj-value'))||0,progress:parseInt(gv('pj-prog'))||0,start:gv('pj-start'),end:gv('pj-end'),notes:gv('pj-notes')};
+  if (editProjId) { const p=SBR.projects.find(x=>x.id===editProjId); if(p) Object.assign(p,obj); }
   else SBR.projects.push({id:SBR.projIdCtr++,...obj});
-  saveAllData();document.getElementById('modal').style.display='none';render();showToast('✅ Project saved!');
+  saveAllData(); document.getElementById('proj-modal').style.display='none';
+  if (editProjId) openDetail(editProjId); else render();
+  showToast('✅ Project saved!');
 }
+
+window.addEventListener('load', async function() { await main(); });
 </script>
 </body>
 </html>
