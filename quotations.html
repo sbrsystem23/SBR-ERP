@@ -6,88 +6,27 @@
 <title>SBR ERP — Quotations</title>
 <link rel="stylesheet" href="shared.css">
 <style>
-/* Quotation builder styles from old ERP */
-.quot-doc{margin-top:10px}
-.sys-hdr{background:var(--blue);color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.sys-name-inp{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.35);color:#fff;font-weight:500;font-size:12px;font-family:Arial,sans-serif;outline:none;flex:1;min-width:80px}
-.item-block{border-bottom:.5px solid #e2e8f0}
-.item-main{display:grid;align-items:stretch;background:#fff;min-height:34px;overflow:hidden}
-.item-main:hover{background:#f8fbff}
-.svc-hdr{background:var(--teal);color:#fff;font-size:11px;padding:6px 14px;display:flex;justify-content:space-between;align-items:center}
-.svc-row{display:grid;align-items:center;background:#e8f7f9;border-bottom:.5px solid #b2e0ea;min-height:38px;overflow:hidden}
-.svc-row:nth-child(even){background:#eff9fb}
-.sys-total{background:var(--blue);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-weight:700;font-size:12px}
-.list-tbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
-.list-tbl th{padding:9px 12px;text-align:left;font-weight:700;color:var(--text2);background:#f8fafc;border-bottom:.5px solid var(--border);white-space:nowrap}
-.list-tbl td{padding:9px 12px;border-bottom:.5px solid #f1f5f9;vertical-align:middle}
-.list-tbl tr:hover td{background:#f0f7ff}
-.list-tbl .td-num{white-space:nowrap;font-weight:700;color:var(--blue)}
-.list-tbl .td-nowrap{white-space:nowrap}
-.list-tbl .td-amt{white-space:nowrap;font-weight:700;color:var(--blue);text-align:right}
-.list-tbl .td-act{white-space:nowrap;text-align:center}
-.list-tbl .td-badge{white-space:nowrap;text-align:center}
-.qt-hdr{width:100%;display:block}
-.qt-ftr{width:100%;display:block}
-.qt-body{display:block;width:100%}
-.qt-closing{display:block;width:100%}
-  .list-tbl{display:block;overflow-x:auto}
-  .svc-row{overflow-x:visible}
-  .col-hdr-row,.item-main,.svc-row{min-width:580px}
-  .sidebar,.topbar,.toolbar,.inv-col-toggle,.sepv,.print-bar,.no-print,
-  body.modal-printing #qt-print-content > div,
-  body.modal-printing #qt-print-content > div:last-child,
-
-/* Page navigation */
-.qview { display:none }
-.qview.active { display:block }
-.page { display:block }
-
-/* Fix old ERP styles for cloud */
-.list-tbl { width:100%;border-collapse:collapse;font-size:12px }
-.list-tbl th { background:#f8fafc;padding:8px 10px;text-align:left;font-size:11px;color:var(--text2);border-bottom:.5px solid var(--border);font-weight:600 }
-.list-tbl td { padding:8px 10px;border-bottom:.5px solid var(--border) }
-.list-tbl tr:hover td { background:#f8fafc }
-.td-num { font-weight:600;color:var(--blue) }
-.td-nowrap { white-space:nowrap }
-.td-badge { text-align:center }
-.td-act { text-align:right }
-.btn-sm { padding:3px 8px;font-size:11px }
-.col-toggle { display:inline-flex;gap:4px;align-items:center }
-.col-btn { padding:3px 8px;border:.5px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;font-size:11px;font-weight:600;color:var(--text2) }
-.col-btn.on { background:var(--blue);color:#fff;border-color:var(--blue) }
-.saved-bar { background:#f8fafc;border:.5px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px }
-.pm-wrap { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none }
-.pm-wrap.open { display:flex;align-items:flex-start;justify-content:center;padding-top:60px }
-.pm-box { background:#fff;border-radius:10px;width:720px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden }
-.pm-head { padding:12px 16px;border-bottom:.5px solid var(--border);display:flex;gap:10px;align-items:center }
-.pm-body { overflow-y:auto;flex:1 }
-.pm-row { display:grid;grid-template-columns:1fr 120px 90px 80px 60px;gap:8px;padding:8px 12px;border-bottom:.5px solid var(--border);align-items:center;font-size:11px;cursor:pointer }
-.pm-row:hover { background:#f0f4ff }
-.pm-row.head { background:#f8fafc;font-weight:700;cursor:default }
-.svc-picker { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none }
-.svc-picker.open { display:flex;align-items:flex-start;justify-content:center;padding-top:60px }
-.svc-box { background:#fff;border-radius:10px;width:600px;max-height:80vh;display:flex;flex-direction:column }
-.svc-head { padding:12px 16px;border-bottom:.5px solid var(--border);display:flex;gap:10px }
-.svc-body { overflow-y:auto;flex:1;padding:8px }
-.svc-row { padding:8px 12px;border-bottom:.5px solid var(--border);cursor:pointer;font-size:12px }
-.svc-row:hover { background:#f0f4ff }
-.q-card { display:none;background:#f0f4ff;border:.5px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:12px }
-.q-card.show { display:block }
-.q-sel-wrap { margin-bottom:12px }
+.qview{display:none}.qview.active{display:block}
+.list-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.list-tbl th{background:#f8fafc;padding:8px 10px;text-align:left;font-size:11px;color:var(--text2);border-bottom:.5px solid var(--border);font-weight:600}
+.list-tbl td{padding:8px 10px;border-bottom:.5px solid var(--border)}
+.list-tbl tr:hover td{background:#f8fafc}
+.td-num{font-weight:600;color:var(--blue)}
+.td-nowrap{white-space:nowrap}
+.td-badge{text-align:center}
+.td-act{text-align:right}
 </style>
 </head>
 <body>
 <div id="sidebar-wrap"></div>
 <div id="topbar-wrap"></div>
-
-<!-- QUOTATION LIST VIEW -->
 <div class="qview active" id="view-list">
   <div class="main">
     <div class="page-hdr">
       <div class="page-title">📄 Quotations</div>
       <button class="btn btn-p" onclick="newQuotation()">+ New Quotation</button>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
       <input class="search-bar" id="ql-search" placeholder="Search quotations..." oninput="renderQuotList(this.value)" style="max-width:280px">
       <select class="fi" id="ql-status" onchange="renderQuotList()" style="max-width:160px">
         <option value="">All Status</option>
@@ -98,990 +37,204 @@
     <div id="quot-list-wrap"></div>
   </div>
 </div>
-
-<!-- QUOTATION BUILDER VIEW -->
-<div class="qview" id="view-builder">
-  <div class="main">
-<div class="page" id="page-quot">
-
-  <!-- Top action bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:.5px solid var(--border);gap:10px;flex-wrap:wrap;margin:-20px -20px 0">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">QT No:</span>
-        <input id="qt-number" class="fi" style="width:150px;font-weight:700" placeholder="QT-2026-001">
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">Date:</span>
-        <input id="qt-date" class="fi" type="date" style="width:140px">
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">Status:</span>
-        <select id="qt-status" class="fi" style="width:140px" onchange="onQtStatusChange(this.value)">
-          <option>Under Discussion</option>
-          <option>Approved</option>
-          <option>Sent</option>
-          <option>Rejected</option>
-          <option>Cancelled</option>
-          <option>On Hold</option>
-          <option>Revised</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">Project Ref:</span>
-        <input id="qt-project-ref" class="fi" style="width:180px" placeholder="e.g. Villa 5, DEWA HQ, Phase 2..." oninput="updateQProjRef()">
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">Payment Terms:</span>
-        <select id="qt-terms" class="fi" style="width:220px">
-          <option value="">— Select —</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;font-weight:600;color:var(--green)">✅ Approved:</span>
-        <input id="qt-approved-date" class="fi" type="date" style="width:140px" placeholder="Approval date">
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
-      <button class="btn btn-sm" onclick="newQuotation()">+ New</button>
-      <button class="btn btn-sm btn-g" onclick="saveQuotation()">💾 Save</button>
-      <button class="btn btn-sm btn-v" onclick="previewQuotation()">🖨 Print / PDF</button>
-      <button class="btn btn-sm" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="sendQuotationEmail()">📧 Send to Client</button>
-    </div>
-  </div>
-
-  <!-- ── APPROVED ACTION BAR — shows when quotation is Approved ── -->
-  <div id="qt-approved-bar" style="display:none;background:linear-gradient(135deg,#0F4C81,#1a6bb5);padding:10px 20px;margin:0 -20px">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span style="font-size:11px;font-weight:700;color:#fff;flex-shrink:0">✅ Approved — What would you like to create?</span>
-      <button onclick="qtCreateProject()" style="padding:5px 14px;background:#fff;color:#0F4C81;border:none;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">📁 Create Project</button>
-      <div style="width:.5px;height:20px;background:rgba(255,255,255,.3)"></div>
-      <span style="font-size:10px;color:rgba(255,255,255,.8);font-style:italic">— or create documents without a project —</span>
-      <button onclick="qtCreatePI()" style="padding:5px 14px;background:#7c3aed;color:#fff;border:none;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">🟣 Proforma Invoice</button>
-      <button onclick="qtCreateDN()" style="padding:5px 14px;background:var(--teal);color:#fff;border:none;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">📦 Delivery Note</button>
-    </div>
-  </div>
-
-  <!-- ── SAVED QUOTATIONS PANEL (collapsible dropdown) ── -->
-  <div style="background:#f8fafc;border-bottom:.5px solid var(--border);margin:0 -20px">
-    <div onclick="toggleSavedQtPanel()" style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none">
-      <span style="font-size:12px;font-weight:700;color:var(--text)">📋 Saved Quotations</span>
-      <span id="saved-quot-count-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--blue);color:#fff;font-weight:600">0</span>
-      <span style="font-size:10px;color:#92400e;background:var(--amber-lt);border:.5px solid #fcd34d;border-radius:4px;padding:2px 8px">💾 Auto-saved</span>
-      <span id="saved-qt-arrow" style="margin-left:auto;font-size:11px;color:var(--text2);transition:transform .2s">▼</span>
-    </div>
-    <div id="saved-qt-panel" style="display:none;padding:8px 14px;border-top:.5px solid var(--border)">
-      <div id="saved-quot-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;align-items:flex-start">
-        <div id="saved-quot-empty" style="font-size:11px;color:var(--text3);font-style:italic;line-height:32px">No saved quotations yet.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── VIEW CONTROLS (collapsible, on top) ── -->
-  <div style="background:var(--surface);border-bottom:.5px solid var(--border);margin:0 -20px">
-    <div onclick="toggleViewControls()" style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none">
-      <span style="font-size:11px;font-weight:700;color:var(--text2)">⚙️ View Controls</span>
-      <span id="vc-arrow" style="margin-left:auto;font-size:11px;color:var(--text2);transform:rotate(180deg);display:inline-block">▼</span>
-    </div>
-    <div id="vc-panel" style="display:block;padding:8px 14px 10px;border-top:.5px solid var(--border)">
-      <div id="vc-content"></div>
-    </div>
-  </div>
-
-  <!-- ── CLIENT STRIP ── -->
-  <div id="q-client-strip" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border-bottom:.5px solid var(--border);margin:0 -20px">
-    <span style="font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap">👤 Client:</span>
-    <div class="cs-wrap" id="q-sel-wrap" style="flex:1;min-width:180px">
-      <input id="q-inp" placeholder="Search and select client..." oninput="showQDD(this.value)" onfocus="showQDD(this.value)" autocomplete="off">
-      <div class="cs-dd" id="q-dd"></div>
-    </div>
-    <div class="sel-card" id="q-card">
-      <div id="q-av" style="width:30px;height:30px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">?</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:#0c447c" id="q-cname">—</div>
-        <div style="font-size:11px;color:var(--text2)" id="q-cdetail">—</div>
-        <div style="font-size:10px;color:#0891b2;font-weight:600;margin-top:2px" id="q-projref" style="display:none"></div>
-      </div>
-      <div style="font-size:11px;color:#0c447c" id="q-ccontact"></div>
-      <button class="btn btn-xs btn-r" onclick="clearQClient()">✕ Clear</button>
-    </div>
-    <button class="btn btn-p btn-sm" onclick="openClientForm();nav('client-form')">+ New Client</button>
-  </div>
-
-  <!-- ── COVER LETTER CARD ── -->
-  <div id="qt-cover-card" class="doc-wrap" style="margin-top:14px;display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f5f3ff;border-bottom:.5px solid #d8b4fe;cursor:pointer" onclick="toggleQtCoverCard()">
-      <span style="font-weight:700;font-size:12px;color:#6b21a8">📄 Cover Letter</span>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn btn-xs" onclick="event.stopPropagation();resetQtCoverLetter()" style="font-size:9px">↺ Reset</button>
-        <button class="btn btn-xs" onclick="event.stopPropagation();nav('qt-cover-edit')" style="font-size:9px">✏️ Full Editor</button>
-        <span id="qt-cover-arrow" style="font-size:11px;color:#6b21a8">▲ Hide</span>
-      </div>
-    </div>
-    <div id="qt-cover-body" style="padding:14px;background:#fff">
-      <div style="margin-bottom:10px">
-        <label class="flbl">Subject Line</label>
-        <input class="fi" id="qt-cover-subject" style="font-size:12px;font-weight:600" placeholder="e.g. Quotation for Smart Home Works" oninput="SBR_QT_COVER.subject=this.value">
-      </div>
-      <div style="margin-bottom:10px">
-        <label class="flbl">Greeting / Body <span style="font-weight:400;color:#9ca3af;font-size:10px">(max 6 rows)</span></label>
-        <textarea class="fi" id="qt-cover-greeting" rows="6" style="font-size:12px;line-height:1.7" spellcheck="true" oninput="SBR_QT_COVER.greeting=this.value"></textarea>
-      </div>
-      <div style="margin-bottom:10px">
-        <label class="flbl">About SBR System <span style="font-weight:400;color:#9ca3af;font-size:10px">(max 5 rows)</span></label>
-        <textarea class="fi" id="qt-cover-about" rows="5" style="font-size:12px;line-height:1.7" spellcheck="true" oninput="SBR_QT_COVER.about=this.value"></textarea>
-      </div>
-      <div style="margin-bottom:10px">
-        <label class="flbl">Scope of Work Summary <span style="font-weight:400;color:#9ca3af;font-size:10px">(max 13 rows)</span></label>
-        <textarea class="fi" id="qt-cover-scope" rows="13" style="font-size:12px;line-height:1.7" spellcheck="true" oninput="SBR_QT_COVER.scope=this.value"></textarea>
-      </div>
-      <div>
-        <label class="flbl">Closing Statement <span style="font-weight:400;color:#9ca3af;font-size:10px">(max 7 rows)</span></label>
-        <textarea class="fi" id="qt-cover-closing" rows="7" style="font-size:12px;line-height:1.7" spellcheck="true" oninput="SBR_QT_COVER.closing=this.value"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TERMS & CONDITIONS CARD (per-quotation) ── -->
-  <div id="qt-tnc-card" class="doc-wrap" style="margin-top:10px;display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-bottom:.5px solid #86efac;cursor:pointer" onclick="toggleQtTnCCard()">
-      <span style="font-weight:700;font-size:12px;color:#166534">📜 Terms & Conditions</span>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn btn-xs" onclick="event.stopPropagation();resetQtTnC()" style="font-size:9px">↺ Reset</button>
-        <span id="qt-tnc-arrow" style="font-size:11px;color:#166534">▼ Show</span>
-      </div>
-    </div>
-    <div id="qt-tnc-body" style="padding:12px 14px;display:none">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Each line is one clause. Edit freely — changes apply to this quotation only.</div>
-      <textarea class="fi" id="qt-tnc-editor" rows="8" style="font-size:11px;line-height:1.6;font-family:Arial,sans-serif" oninput="syncQtTnC()"></textarea>
-      <button class="btn btn-sm btn-g" onclick="saveQtTnC()" style="margin-top:8px">💾 Save Terms</button>
-    </div>
-  </div>
-
-  <!-- ── QUOTATION DOCUMENT ── -->
-  <div class="quot-doc" id="quot-doc" style="margin-top:14px"></div>
-  <div style="display:flex;gap:8px;margin:10px 0 20px">
-    <div class="add-sys-btn" style="flex:1;margin:0" onclick="addSystem()">＋ Add New System</div>
-    <div class="add-sys-btn" style="margin:0;padding:11px 18px;white-space:nowrap" onclick="addSummaryRow()">📋 Add Summary Row</div>
-  </div>
-
-  <!-- Product Modal -->
-  <div class="modal-bg" id="prod-modal">
-    <div class="modal">
-      <div class="modal-hdr"><span style="font-size:13px;font-weight:500" id="pm-title">Add Item</span><button class="btn btn-sm" onclick="closePM()">✕</button></div>
-      <div style="padding:12px 14px">
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <input class="fi" style="flex:1" id="pm-search" placeholder="Search products..." oninput="renderPL()">
-          <select class="fi" style="width:auto" id="pm-cat" onchange="renderPL()">
-            <option value="">All</option>
-          </select>
-        </div>
-        <div id="pm-list" style="max-height:220px;overflow-y:auto"></div>
-        <div style="border:.5px solid var(--border);border-radius:8px;padding:12px;margin-top:10px">
-          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px">— Or add custom item —</div>
-          <div class="fg2" style="margin-bottom:7px">
-            <div class="field"><label class="flbl">Name *</label><input class="fi" id="ci-name"></div>
-            <div class="field"><label class="flbl">Model</label><input class="fi" id="ci-model"></div>
-          </div>
-          <div class="fg3" style="margin-bottom:7px">
-            <div class="field"><label class="flbl">Qty</label><input class="fi" id="ci-qty" type="number" value="1"></div>
-            <div class="field"><label class="flbl">Price (AED)</label><input class="fi" id="ci-price" type="number" value="0"></div>
-            <div class="field"><label class="flbl">Discount %</label><input class="fi" id="ci-disc" type="number" value="0"></div>
-          </div>
-          <div class="field" style="margin-bottom:8px"><label class="flbl">Description</label><input class="fi" id="ci-desc"></div>
-          <button class="btn btn-g btn-sm" onclick="addCustomItem()">＋ Add</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ QUOTATION PRINT MODAL ════ -->
-<div class="print-modal" id="qt-print-modal">
-  <div class="print-doc" style="max-width:820px">
-    <div class="print-bar">
-      <span style="font-size:12px;font-weight:500">🖨 Quotation Preview</span>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-sm btn-g" onclick="modalPrint()">🖨 Print / Save PDF</button>
-        <button class="btn btn-sm" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="document.getElementById('qt-print-modal').classList.remove('open');restoreDocTitle();openSendModal()">📧 Send to Client</button>
-        <button class="btn btn-sm btn-r" onclick="document.getElementById('qt-print-modal').classList.remove('open')">✕ Close</button>
-      </div>
-    </div>
-
-    <!-- ── Page Layout Editor ── -->
-    <div id="qt-layout-editor" class="no-print" style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;padding:10px 16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:11px;font-weight:700;color:#0F4C81;text-transform:uppercase;letter-spacing:.5px">📋 Page Layout — drag blocks to reorder or move between pages</span>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-sm" onclick="qtLayoutAddPage()" style="font-size:10px;padding:2px 9px">+ Add Page</button>
-          <button class="btn btn-sm" onclick="qtLayoutReset()" style="font-size:10px;padding:2px 9px">↺ Reset</button>
-        </div>
-      </div>
-      <div id="qt-layout-pages" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"></div>
-    </div>
-
-    <div id="qt-print-content" style="background:#fff;padding:0"></div>
-  </div>
-</div>
-
-<!-- ════ SEND EMAIL MODAL ════ -->
-<div class="modal-bg" id="qt-send-modal">
-  <div class="modal" style="max-width:520px">
-    <div class="modal-hdr">
-      <span style="font-size:13px;font-weight:600">📧 Send Quotation to Client</span>
-      <button class="btn btn-sm" onclick="document.getElementById('qt-send-modal').classList.remove('open')">✕</button>
-    </div>
-    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-
-      <!-- Info bar -->
-      <div style="background:var(--blue-lt);border:.5px solid #b5d4f4;border-radius:6px;padding:10px 14px;font-size:11px;color:#0c447c">
-        ℹ️ This will open your default email app (Outlook, Gmail desktop, Apple Mail) with the quotation details pre-filled. You can review and send from there.
-      </div>
-
-      <div class="field"><label class="flbl">To (Client Email) <span class="req">*</span></label>
-        <input class="fi" id="send-to" type="email" placeholder="client@email.com">
-      </div>
-      <div class="field"><label class="flbl">CC</label>
-        <input class="fi" id="send-cc" placeholder="e.g. accounts@sbrsystem.ae">
-      </div>
-      <div class="field"><label class="flbl">Subject</label>
-        <input class="fi" id="send-subject">
-      </div>
-      <div class="field"><label class="flbl">Message Body</label>
-        <textarea spellcheck="true" autocorrect="on" class="fi" id="send-body" style="min-height:180px;font-family:Arial,sans-serif;font-size:11px;line-height:1.6"></textarea>
-      </div>
-
-      <!-- Quick options -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span style="font-size:10px;color:var(--text2);font-weight:600;align-self:center">Language:</span>
-        <button class="btn btn-xs" onclick="setEmailTemplate('en')">English</button>
-        <button class="btn btn-xs" onclick="setEmailTemplate('ar')">Arabic</button>
-      </div>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:6px;border-top:.5px solid var(--border)">
-        <button class="btn" onclick="document.getElementById('qt-send-modal').classList.remove('open')">Cancel</button>
-        <button class="btn btn-g" onclick="sendViaMailto()">📤 Open in Email App</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ SERVICE PICKER MODAL (for quotation) ════ -->
-<div class="modal-bg" id="svc-picker-modal">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-hdr">
-      <span style="font-size:13px;font-weight:600">🔧 Add Service to System</span>
-      <button class="btn btn-sm" onclick="document.getElementById('svc-picker-modal').classList.remove('open')">✕</button>
-    </div>
-    <div style="padding:12px 16px">
-      <input class="fi" id="svc-picker-search" placeholder="Search services..." oninput="renderSvcPicker()" style="margin-bottom:10px">
-      <div id="svc-picker-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
-      <div style="border-top:.5px solid var(--border);padding-top:10px;margin-top:10px">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Or add a custom service:</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="fi" id="svc-custom-name" placeholder="Service name" style="flex:2;min-width:140px">
-          <input class="fi" id="svc-custom-qty" type="number" value="1" min="1" placeholder="Qty" style="width:60px">
-          <input class="fi" id="svc-custom-price" type="number" value="0" min="0" placeholder="Price" style="width:90px">
-          <button class="btn btn-g btn-sm" onclick="addCustomSvc()">+ Add</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════ AMC QUOTATION ════════════════ -->
-<!-- ════ AMC QUOTATION LIST ════ -->
-  </div>
-</div>
-
 <script src="shared.js"></script>
 <script>
-// ── MISSING HELPERS FROM OLD ERP ────────────────────
-window.fmtNum = function(n, d) { return Number(n||0).toLocaleString('en-AE', {minimumFractionDigits:d||2, maximumFractionDigits:d||2}); };
-window.fmtDate = function(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;} };
-window.fmtDateShort = function(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short'});}catch(e){return d;} };
-window.populateCatSelect = function(id, cat, val) { var sel=document.getElementById(id);if(!sel)return;var opts=SBR.cats&&SBR.cats[cat]?SBR.cats[cat]:[];sel.innerHTML=opts.map(function(o){var v=typeof o==='object'?o.name:o;return'<option value="'+v+'"'+(v==val?' selected':'')+'>'+v+'</option>';}).join(''); };
-window.refreshStatusSelects = function() {};
-window.showToast = window.showToast || function(msg){console.log(msg);};
-window.colState = window.colState || {};
-
-// ── VARIABLE ALIASES (old ERP -> cloud ERP) ──────────
-// These make old ERP JS work with cloud ERP data
-Object.defineProperties(window, {
-  savedQuotations: { get: ()=>SBR.savedQuotations, set: v=>SBR.savedQuotations=v },
-  clients: { get: ()=>SBR.clients },
-  productDB: { get: ()=>SBR.productDB },
-  services: { get: ()=>SBR.services },
-  staff: { get: ()=>SBR.staff },
-  projects: { get: ()=>SBR.projects },
-  qtIdCtr: { get: ()=>SBR.qtIdCtr, set: v=>SBR.qtIdCtr=v },
-  quotGroupCtr: { get: ()=>SBR.quotGroupCtr, set: v=>SBR.quotGroupCtr=v },
+window.fmtNum=function(n,d){return Number(n||0).toLocaleString('en-AE',{minimumFractionDigits:d||2,maximumFractionDigits:d||2});};
+window.fmtDate=function(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}};
+window.fmt=function(n){return fmtNum(n);};
+window.colState={};
+window.populateCatSelect=function(){};
+window.refreshStatusSelects=function(){};
+Object.defineProperties(window,{
+  savedQuotations:{get:()=>SBR.savedQuotations,set:v=>SBR.savedQuotations=v},
+  clients:{get:()=>SBR.clients},productDB:{get:()=>SBR.productDB},
+  services:{get:()=>SBR.services},staff:{get:()=>SBR.staff},projects:{get:()=>SBR.projects},
+  qtIdCtr:{get:()=>SBR.qtIdCtr,set:v=>SBR.qtIdCtr=v},
+  quotGroupCtr:{get:()=>SBR.quotGroupCtr,set:v=>SBR.quotGroupCtr=v}
 });
-
-// Category helpers
-function getCatOpts(cat) {
-  var opts = SBR.cats && SBR.cats[cat] ? SBR.cats[cat] : [];
-  return opts.map(function(o){ return typeof o==='object'?o.name:o; });
-}
-
-// Navigation: show/hide views
-function showView(id) {
-  document.querySelectorAll('.qview').forEach(function(el){ el.classList.remove('active'); });
-  document.getElementById(id).classList.add('active');
-}
-
-// Old ERP nav() replacement
-function nav(page) {
-  if(page==='quot-list' || page==='quotations') { showView('view-list'); renderQuotList(); }
-  else if(page==='quot') { showView('view-builder'); }
-}
-
-// Old ERP showPage() replacement  
-function showPage(page) { nav(page); }
-
-function newQuotation(){
-  if(systems.length&&!confirm('Start a new quotation? Unsaved changes will be lost.'))return;
-  currentQtId=null;systems=[];qClient=null;qtDiscPct=0;qtDiscAmt=0;
-  sv('qt-number','QT-'+new Date().getFullYear()+'-'+String(qtIdCtr).padStart(3,'0'));
-  sv('qt-date',td());sv('qt-status','Under Discussion');sv('qt-approved-date','');sv('qt-project-ref','');sv('qt-terms','');
-  showQtApprovedBar(false);
-  SBR_QT_COVER=JSON.parse(JSON.stringify(_defaultQtCover));
-  document.getElementById('q-sel-wrap').style.display='';
-  document.getElementById('q-card').classList.remove('show');
-  renderQuot();
-}
-
-function loadQuotation(id){
-  var qt=savedQuotations.find(function(q){return q.id===id;});if(!qt)return;
-  if(!checkDocLock(qt.status))return; // 🔒 PIN check for approved quotations
-  currentQtId=qt.id;
-  pendingVersionGroupId=null;
-  systems=JSON.parse(JSON.stringify(qt.systems));
-  // Fix legacy fractional disc
-  systems.forEach(function(sys){
-    (sys.items||[]).forEach(function(it){
-      if(!it.isSummary&&(it.disc||0)>0&&(it.disc||0)<1){
-        it.price=Math.round(it.price*(1-it.disc/100)*100)/100;
-        it.disc=0;
-      }
-    });
-  });
-  sv('qt-number',qt.num);sv('qt-date',qt.date);sv('qt-status',qt.status);
-  sv('qt-approved-date',qt.approvedDate||'');
-  sv('qt-project-ref',qt.projectRef||'');
-  sv('qt-terms',qt.paymentTerms||'');
-  updateQProjRef();
-  showQtApprovedBar(qt.status==='Approved');
-  // Restore per-quotation cover letter and terms
-  if(qt.coverLetter)SBR_QT_COVER=JSON.parse(JSON.stringify(qt.coverLetter));
-  if(qt.customTnC&&qt.customTnC.length)SBR_TNC=JSON.parse(JSON.stringify(qt.customTnC));
-  qClient=qt.clientId?clients.find(function(c){return c.id===qt.clientId;}):null;
-  qtDiscPct=parseFloat(qt.discPct)||0;
-  qtDiscAmt=parseFloat(qt.discAmt)||0;
-  if(qClient){
-    document.getElementById('q-sel-wrap').style.display='none';
-    document.getElementById('q-card').classList.add('show');
-    document.getElementById('q-av').textContent=initials(qClient.name);
-    document.getElementById('q-cname').textContent=qClient.name;
-    document.getElementById('q-cdetail').textContent=qClient.type+(qClient.addr?' · '+qClient.addr:'');
-  } else {
-    document.getElementById('q-sel-wrap').style.display='';
-    document.getElementById('q-card').classList.remove('show');
-  }
-  renderQuot();
-  nav('quot');
-}
-
-function renderQuot(){
-  pdb2_loadImgs();
-  fixLegacyDisc(systems);
-  renderViewControls();
-  var doc=document.getElementById('quot-doc');doc.innerHTML='';
-  // Client selector visibility
-  var cs=document.getElementById('q-client-strip');
-  if(cs)cs.style.display=getSec('client')?'':'none';
-  var gc=getGC(),grandNet=0,grandVat=0,sysSums=[];
-  systems.forEach(function(sys,si){
-    var sysKey='sys'+si;
-    var svcKey='sys'+si+'_svcs';
-    var scopeKey='sys'+si+'_scope';
-    // ALWAYS calculate totals from ALL items/services regardless of hidden state
-    var iTotal=0,svcVat=0;
-    sys.items.forEach(function(it){
-      if(it.isSummary)return;// summary rows have no price
-      var c=calcItem(it);iTotal+=c.net;
-    });
-    sys.svcs.forEach(function(s){
-      if(s.isSummary)return;// summary rows have no price
-      var sNet=(s.qty||1)*(s.price||0)*(1-(s.disc||0)/100);iTotal+=sNet;svcVat+=sNet*(s.vat||5)/100;
-    });
-    var sysVat=0;
-    sys.items.forEach(function(it){if(!it.isSummary){sysVat+=calcItem(it).vat;}});
-    sysVat+=svcVat;
-    grandNet+=iTotal;grandVat+=sysVat;
-    sysSums.push({name:'System '+(si+1)+' — '+sys.name,total:Math.round(iTotal*100)/100});
-    // If whole system hidden — skip rendering only
-    if(!getSec(sysKey))return;
-    var sDiv=document.createElement('div');sDiv.className='doc-wrap';
-    var hdr=document.createElement('div');hdr.className='sys-hdr';
-    hdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'+
-      '<span style="background:rgba(255,255,255,.2);border-radius:4px;padding:2px 8px;font-size:10px;white-space:nowrap">SYS '+(si+1)+'</span>'+
-      '<input class="sys-name-inp" value="'+sys.name+'" oninput="systems['+si+'].name=this.value"></div>'+
-      '<div style="display:flex;gap:5px;flex-shrink:0">'+
-        '<button style="background:rgba(255,255,255,.15);border:.5px solid rgba(255,255,255,.3);color:#fff;font-size:10px;border-radius:4px;padding:3px 8px;cursor:pointer;font-family:Arial,sans-serif" onclick="openPM('+si+')">＋ Item</button>'+
-        '<button style="background:rgba(255,255,255,.15);border:.5px solid rgba(255,255,255,.3);color:#fff;font-size:10px;border-radius:4px;padding:3px 8px;cursor:pointer;font-family:Arial,sans-serif" onclick="togCollapse('+si+')">'+(sys.collapsed?'▼':'▲')+'</button>'+
-        '<button style="background:rgba(239,68,68,.3);border:.5px solid rgba(239,68,68,.5);color:#fff;font-size:10px;border-radius:4px;padding:3px 8px;cursor:pointer;font-family:Arial,sans-serif" onclick="removeSystem('+si+')">✕</button>'+
-      '</div>';
-    sDiv.appendChild(hdr);
-    if(sys.collapsed){var cp2=document.createElement('div');cp2.style.cssText='padding:8px 14px;font-size:11px;color:var(--text2);font-style:italic;background:#fff';cp2.textContent='System '+(si+1)+' collapsed · click ▼ to expand';sDiv.appendChild(cp2);doc.appendChild(sDiv);return;}
-    var hdrRow=document.createElement('div');hdrRow.className='col-hdr-row';hdrRow.style.gridTemplateColumns=gc;
-    [{t:'#',a:true,c:'c'},{t:'Img',col:'img',c:'c'},{t:'Item Name',a:true},{t:'Model',col:'model',c:'c'},{t:'Qty',col:'qty',c:'c'},{t:'Unit Price',col:'price',c:'r'},{t:'Disc.',col:'disc',c:'c'},{t:'VAT',col:'vat',c:'c'},{t:'Total (AED)',col:'total',c:'r'},{t:'',a:true,c:'c'}]
-      .forEach(function(h){if(!h.a&&!colState[h.col])return;var d=document.createElement('div');d.className='ch '+(h.c||'');d.textContent=h.t;hdrRow.appendChild(d);});
-    sDiv.appendChild(hdrRow);
-    var dispTotal=0;
-    var summaryRowEl=null; // will be appended last
-    sys.items.forEach(function(it,ii){
-      // ── SUMMARY ROW ── capture but don't append yet — always goes last
-      if(it.isSummary){
-        var itemsOnlyTotal=0;
-        sys.items.forEach(function(x){if(!x.isSummary){itemsOnlyTotal+=calcItem(x).net;}});
-        itemsOnlyTotal=Math.round(itemsOnlyTotal*100)/100;
-        var sumRow=document.createElement('div');
-        sumRow.style.cssText='background:#f0f7ff;border-bottom:.5px solid #b5d4f4;display:grid;align-items:center;min-height:38px;grid-template-columns:'+gc;
-        // Build one cell per grid column — empty divs for unused columns
-        var sc='<div style="padding:6px 8px;font-size:10px;color:var(--blue);font-weight:700;text-align:center">≡</div>';
-        if(colState.img)sc+='<div></div>';
-        sc+='<div style="padding:6px 8px;overflow:hidden"><input style="border:none;background:transparent;font-size:11px;font-family:Arial,sans-serif;width:100%;outline:none;color:var(--blue);font-style:italic" value="'+escH(it.summaryText)+'" placeholder="Summary text..." oninput="systems['+si+'].items['+ii+'].summaryText=this.value"></div>';
-        if(colState.model)sc+='<div></div>';
-        if(colState.qty)sc+='<div></div>';
-        if(colState.price)sc+='<div></div>';
-        if(colState.disc)sc+='<div></div>';
-        if(colState.vat)sc+='<div></div>';
-        if(colState.total)sc+='<div style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:right;background:#e0eeff">'+fmt(itemsOnlyTotal)+'</div>';
-        sc+='<div style="padding:6px 8px;text-align:center"><button class="btn btn-xs btn-r" onclick="removeItem('+si+','+ii+')" title="Remove">✕</button></div>';
-        sumRow.innerHTML=sc;
-        summaryRowEl=sumRow;
-        return;
-      }
-      // ── HIDDEN ITEM ── always show restore bar regardless of summary row
-      if(it.hidden){
-        var cv=calcItem(it);dispTotal+=cv.net;
-        var ph3=document.createElement('div');
-        ph3.style.cssText='padding:5px 14px;font-size:11px;color:var(--text2);background:#fffbeb;cursor:pointer;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between';
-        ph3.innerHTML='<span>▸ '+it.num+' — '+escH(it.name)+' (hidden — included in total)</span>'+
-          '<span style="display:flex;align-items:center;gap:8px">'+
-            '<span style="font-size:11px;font-weight:600;color:var(--text2)">'+fmt(cv.net)+'</span>'+
-            '<button class="btn btn-xs" onclick="systems['+si+'].items['+ii+'].hidden=false;renderQuot()" style="font-size:10px">👁 Show</button>'+
-          '</span>';
-        sDiv.appendChild(ph3);
-        return;
-      }
-      var c=calcItem(it);dispTotal+=c.net;// accumulate net only
-      var block=document.createElement('div');block.className='item-block';
-      var row=document.createElement('div');row.className='item-main';row.style.gridTemplateColumns=gc;
-      var cells='<div class="ic nc">'+it.num+'</div>';
-      if(colState.img){
-        var _liveImg=PROD2_IMGS[it.prodId]||(it.img&&it.img.startsWith('data:')?it.img:'');
-        if(!_liveImg&&it.name){var _mp=productDB.find(function(p){return p.name===it.name||(p.model&&p.model===it.model);});if(_mp)_liveImg=PROD2_IMGS[_mp.id]||(_mp.sbrImg&&_mp.sbrImg.startsWith('data:')?_mp.sbrImg:'')||(_mp.supImg&&_mp.supImg.startsWith('data:')?_mp.supImg:'');}
-        // Bundle: show image strip if has parts
-        var _bundleImgs=(it.bundleParts&&it.bundleParts.length)?it.bundleParts.map(function(bp){
-          var _bp=productDB.find(function(p){return p.id===bp.productId;});
-          return _bp?(PROD2_IMGS[_bp.id]||(_bp.sbrImg&&_bp.sbrImg.startsWith('data:')?_bp.sbrImg:'')||(_bp.supImg&&_bp.supImg.startsWith('data:')?_bp.supImg:'')):null;
-        }).filter(Boolean):[];
-        var _imgCell;
-        if(_bundleImgs.length>0){
-          _imgCell='<div style="display:flex;flex-direction:column;gap:2px;align-items:center">'+
-            (_liveImg?'<img src="'+_liveImg+'" style="width:44px;height:44px;object-fit:contain;border-radius:4px;border:.5px solid var(--border);background:#f8fafc">':'<div class="img-ph">📦</div>')+
-            '<div style="display:flex;gap:1px;flex-wrap:wrap;justify-content:center;max-width:48px">'+
-              _bundleImgs.slice(0,4).map(function(src){return'<img src="'+src+'" style="width:20px;height:20px;object-fit:contain;border-radius:2px;background:#f8fafc;border:.5px solid #e2e8f0">';}).join('')+
-            '</div>'+
-          '</div>';
-        } else {
-          _imgCell=_liveImg?'<img src="'+_liveImg+'" style="width:44px;height:56px;object-fit:contain;border-radius:4px;border:.5px solid var(--border);background:#f8fafc">':'<div class="img-ph">📦</div>';
-        }
-        cells+='<div class="ic c">'+_imgCell+'</div>';
-      }
-      cells+='<div class="ic nm"><span class="nm-txt" title="'+escH(it.name)+'">'+escH(it.name)+'</span></div>';
-      if(colState.model)cells+='<div class="ic md">'+it.model+'</div>';
-      if(colState.qty)cells+='<div class="ic c"><div style="display:flex;align-items:center;gap:2px"><input class="inline-inp" type="text" inputmode="decimal" value="'+it.qty+'" style="width:34px;font-weight:700;text-align:center" oninput="systems['+si+'].items['+ii+'].qty=parseFloat(this.value)||1;renderQuotDebounced()"><div style="display:flex;flex-direction:column;gap:1px"><button onclick="systems['+si+'].items['+ii+'].qty=Math.max(1,(systems['+si+'].items['+ii+'].qty||1)+1);renderQuot()" style="font-size:8px;padding:0 3px;border:.5px solid var(--border);border-radius:2px;background:#f8fafc;cursor:pointer;line-height:12px">▲</button><button onclick="systems['+si+'].items['+ii+'].qty=Math.max(1,(systems['+si+'].items['+ii+'].qty||1)-1);renderQuot()" style="font-size:8px;padding:0 3px;border:.5px solid var(--border);border-radius:2px;background:#f8fafc;cursor:pointer;line-height:12px">▼</button></div></div></div>';
-      if(colState.price)cells+='<div class="ic r"><input class="inline-inp" type="text" inputmode="decimal" value="'+it.price+'" style="width:80px;text-align:right;color:var(--blue);font-weight:600" oninput="systems['+si+'].items['+ii+'].price=parseFloat(this.value)||0" onchange="renderQuotDebounced()" title="Edit unit price"></div>';
-      if(colState.disc)cells+='<div class="ic dc"><input class="inline-inp" type="text" inputmode="decimal" value="'+it.disc+'" style="width:32px;color:#92400e;text-align:center" oninput="systems['+si+'].items['+ii+'].disc=parseFloat(this.value)||0" onchange="renderQuotDebounced()">%</div>';
-      if(colState.vat)cells+='<div class="ic vc">'+it.vat+'%</div>';
-      if(colState.total)cells+='<div class="ic tc">'+fmt(c.net)+'</div>';
-      cells+='<div class="ic" style="justify-content:center;gap:2px"><button class="btn btn-xs" style="background:#f1f5f9;color:var(--text2)" onclick="hideItem('+si+','+ii+')" title="Hide">👁</button><button class="btn btn-xs btn-r" onclick="removeItem('+si+','+ii+')">✕</button></div>';
-      row.innerHTML=cells;block.appendChild(row);
-      if(getSec('desc')&&it.desc){var dr=document.createElement('div');dr.className='desc-row';dr.innerHTML='<div class="desc-txt">'+it.desc+'</div>';block.appendChild(dr);}
-      sDiv.appendChild(block);
-    });
-    // Append items summary row last — always at bottom of items section
-    if(summaryRowEl)sDiv.appendChild(summaryRowEl);
-    var isub=document.createElement('div');isub.className='sub-bar';isub.innerHTML='<span>Items Subtotal (excl. VAT)</span><span>'+fmt(dispTotal)+'</span>';
-    if(getSec('subtotals'))sDiv.appendChild(isub);
-    // NO add buttons here — moved to bottom before System Subtotal
-      var svcVat=0;
-      if(getSec(svcKey)){
-      var sh=document.createElement('div');sh.className='svc-hdr';
-      sh.innerHTML='<span>SERVICES</span>'+
-        '<div style="display:flex;gap:6px">'+
-          '<button style="background:rgba(255,255,255,.15);border:.5px solid rgba(255,255,255,.3);color:#fff;font-size:10px;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:Arial,sans-serif" onclick="openSvcPicker('+si+')">+ From DB</button>'+
-          '<button style="background:rgba(255,255,255,.15);border:.5px solid rgba(255,255,255,.3);color:#fff;font-size:10px;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:Arial,sans-serif" onclick="addManualSvc('+si+')">+ Manual</button>'+
-        '</div>';
-      sDiv.appendChild(sh);
-      var svcT=0;
-      var svcSummaryRowEl=null;
-      if(sys.svcs.length){
-        for(var svi=0;svi<sys.svcs.length;svi++){
-          var svc=sys.svcs[svi];
-          // ── SERVICE SUMMARY ROW ── save for last
-          if(svc.isSummary){
-            var svcsOnlyTotal=0;
-            sys.svcs.forEach(function(x){if(!x.isSummary){svcsOnlyTotal+=Math.round((x.qty||1)*(x.price||0)*(1-(x.disc||0)/100)*100)/100;}});
-            svcsOnlyTotal=Math.round(svcsOnlyTotal*100)/100;
-            var svcSumRow=document.createElement('div');
-            svcSumRow.style.cssText='background:#e0f7fb;border-bottom:.5px solid #b2e0ea;display:grid;align-items:center;min-height:36px;grid-template-columns:'+gc;
-            var ssc='<div style="padding:6px 8px;font-size:10px;color:#0891b2;font-weight:700;text-align:center">≡</div>';
-            if(colState.img)ssc+='<div></div>';
-            ssc+='<div style="padding:6px 8px;overflow:hidden"><input style="border:none;background:transparent;font-size:11px;font-family:Arial,sans-serif;width:100%;outline:none;color:#0891b2;font-style:italic" value="'+escH(svc.summaryText||'')+'" placeholder="Service summary text..." oninput="systems['+si+'].svcs['+svi+'].summaryText=this.value"></div>';
-            if(colState.model)ssc+='<div></div>';
-            if(colState.qty)ssc+='<div></div>';
-            if(colState.price)ssc+='<div></div>';
-            if(colState.disc)ssc+='<div></div>';
-            if(colState.vat)ssc+='<div></div>';
-            if(colState.total)ssc+='<div style="padding:6px 8px;font-size:11px;font-weight:700;color:#0891b2;text-align:right;background:#c8f0f6">'+fmt(svcsOnlyTotal)+'</div>';
-            ssc+='<div style="padding:6px 8px;text-align:center"><button class="btn btn-xs btn-r" onclick="removeSvc('+si+','+svi+')" title="Remove">✕</button></div>';
-            svcSumRow.innerHTML=ssc;
-            svcSummaryRowEl=svcSumRow;
-            continue;
-          }
-          var svcNet=(svc.qty||1)*(svc.price||0)*(1-(svc.disc||0)/100);
-          var svcVatAmt=svcNet*(svc.vat||5)/100;
-          svcT+=svcNet;svcVat+=svcVatAmt;
-          var visibleItems=sys.items.filter(function(it){return!it.hidden&&!it.isSummary;}).length;
-          var visibleSvcsBefore=0;for(var _k=0;_k<svi;_k++){if(!sys.svcs[_k].hidden)visibleSvcsBefore++;}
-          var svcNum=(si+1)+'.'+(visibleItems+visibleSvcsBefore+1);
-          if(svc.hidden){
-            var ph=document.createElement('div');
-            ph.style.cssText='padding:5px 14px;font-size:11px;color:var(--text2);background:#fffbeb;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between';
-            ph.innerHTML='<span>▸ 🔧 '+escH(svc.name)+' (hidden — included in total)</span>'+
-              '<span style="display:flex;align-items:center;gap:8px">'+
-                '<span style="font-size:11px;font-weight:600;color:var(--text2)">'+fmt(svcNet)+'</span>'+
-                '<button class="btn btn-xs" onclick="systems['+si+'].svcs['+svi+'].hidden=false;renderQuot()" style="font-size:10px">👁 Show</button>'+
-              '</span>';
-            sDiv.appendChild(ph);
-            continue;
-          }
-          var sr=document.createElement('div');sr.className='svc-row';
-          sr.style.gridTemplateColumns=gc;
-          var cells='<div class="ic c" style="font-size:10px;font-weight:600;color:var(--text2)">'+svcNum+'</div>';
-          if(colState.img)cells+='<div class="ic c" style="font-size:16px">🔧</div>';
-          cells+='<div class="ic" style="overflow:hidden;min-width:0"><input style="border:none;background:transparent;font-size:12px;width:100%;font-family:Arial,sans-serif;outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" value="'+escH(svc.name)+'" oninput="systems['+si+'].svcs['+svi+'].name=this.value;renderQuot()"></div>';
-          if(colState.model)cells+='<div class="ic c" style="font-size:9px;color:var(--text3)">—</div>';
-          if(colState.qty)cells+='<div class="ic c"><div style="display:flex;align-items:center;gap:2px"><input class="inline-inp" type="text" inputmode="decimal" style="width:38px;text-align:center" value="'+(svc.qty||1)+'" oninput="systems['+si+'].svcs['+svi+'].qty=parseFloat(this.value)||1;renderQuotDebounced()"><div style="display:flex;flex-direction:column;gap:1px"><button onclick="systems['+si+'].svcs['+svi+'].qty=Math.max(1,(systems['+si+'].svcs['+svi+'].qty||1)+1);renderQuot()" style="font-size:8px;padding:0 3px;border:.5px solid var(--border);border-radius:2px;background:#f8fafc;cursor:pointer;line-height:12px">▲</button><button onclick="systems['+si+'].svcs['+svi+'].qty=Math.max(1,(systems['+si+'].svcs['+svi+'].qty||1)-1);renderQuot()" style="font-size:8px;padding:0 3px;border:.5px solid var(--border);border-radius:2px;background:#f8fafc;cursor:pointer;line-height:12px">▼</button></div></div></div>';
-          if(colState.price)cells+='<div class="ic r"><input class="inline-inp" type="text" inputmode="decimal" style="width:80px;text-align:right;color:var(--blue);font-weight:600" value="'+(svc.price||0)+'" oninput="systems['+si+'].svcs['+svi+'].price=parseFloat(this.value)||0" onchange="renderQuotDebounced()" title="Edit price"></div>';
-          if(colState.disc)cells+='<div class="ic c" style="display:flex;align-items:center;gap:1px"><input class="inline-inp" type="text" inputmode="decimal" style="width:32px;text-align:center" value="'+(svc.disc||0)+'" oninput="systems['+si+'].svcs['+svi+'].disc=parseFloat(this.value)||0;renderQuotDebounced()"><span style="font-size:10px;color:var(--text2)">%</span></div>';
-          if(colState.vat)cells+='<div class="ic c" style="display:flex;align-items:center;gap:1px"><input class="inline-inp" type="text" inputmode="decimal" style="width:32px;text-align:center" value="'+(svc.vat||5)+'" oninput="systems['+si+'].svcs['+svi+'].vat=parseFloat(this.value)||0;renderQuotDebounced()"><span style="font-size:10px;color:var(--text2)">%</span></div>';
-          if(colState.total)cells+='<div class="ic r" style="color:var(--blue);font-weight:700">'+fmtN(svcNet)+'</div>';
-          cells+='<div class="ic c" style="display:flex;gap:2px;justify-content:center">'+'<button class="btn btn-xs" style="font-size:10px;padding:2px 4px" onclick="systems['+si+'].svcs['+svi+'].hidden=true;renderQuot()" title="Hide">👁</button>'+'<button class="btn btn-xs btn-r" onclick="removeSvc('+si+','+svi+')">✕</button></div>';
-          sr.innerHTML=cells;
-          sDiv.appendChild(sr);
-        }
-      } else {
-        var emptyRow=document.createElement('div');
-        emptyRow.style.cssText='padding:10px 14px;font-size:11px;color:var(--text3);font-style:italic;background:var(--surface2)';
-        emptyRow.textContent='No services added. Click "+ From DB" to add from your service list, or "+ Manual" for a custom service.';
-        sDiv.appendChild(emptyRow);
-      }
-      // Append service summary row last — always at bottom of services section
-      if(svcSummaryRowEl)sDiv.appendChild(svcSummaryRowEl);
-      var svcSub=document.createElement('div');svcSub.className='sub-bar';
-      svcSub.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:#d4eef4;border-bottom:.5px solid #b2e0ea;font-size:11px;font-weight:700';
-      svcSub.innerHTML='<span>Services Subtotal (excl. VAT)</span><span>'+fmt(svcT)+'</span>';
-      if(getSec('subtotals'))sDiv.appendChild(svcSub);
-      }// end getSec(svcKey)
-    var sysDisplayTotal=Math.round((dispTotal+(getSec(svcKey)?svcT:0))*100)/100;
-    // ── ACTION BUTTONS — before System Subtotal ──
-    var hasSumRow=sys.items.some(function(x){return x.isSummary;});
-    var hasSvcSumRow=sys.svcs.some(function(x){return x.isSummary;});
-    var actBtn=document.createElement('div');
-    actBtn.style.cssText='display:flex;gap:6px;padding:8px 14px;background:var(--surface2);border-top:.5px solid var(--border);align-items:center;flex-wrap:wrap';
-    actBtn.innerHTML=
-      '<button class="btn btn-g btn-sm" onclick="openPM('+si+')">＋ Add Item</button>'+
-      (!hasSumRow?'<button class="btn btn-sm" onclick="addSummaryRowToSys('+si+')" style="background:var(--blue-lt);color:var(--blue);border-color:#b5d4f4">📋 Item Summary Row</button>':'')+
-      '<button class="btn btn-sm" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="openSvcPicker('+si+')">🔧 Add Service</button>'+
-      (!hasSvcSumRow?'<button class="btn btn-sm" onclick="addSvcSummaryRow('+si+')" style="background:#e0f7fb;color:#0891b2;border-color:#b2e0ea">📋 Service Summary Row</button>':'');
-    sDiv.appendChild(actBtn);
-    var stbar=document.createElement('div');stbar.className='sys-total';stbar.innerHTML='<span>SYSTEM '+(si+1)+' SUBTOTAL (excl. VAT)</span><span>'+fmt(sysDisplayTotal)+'</span>';sDiv.appendChild(stbar);
-    if(getSec(scopeKey)){
-    var scope=document.createElement('div');scope.style.cssText='border-top:2px solid var(--blue);padding:10px 14px;background:#fff';
-    scope.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Scope of Work</div><div class="scope-box" contenteditable="true" oninput="systems['+si+'].scope=this.innerText">'+sys.scope+'</div>';
-    sDiv.appendChild(scope);}
-    doc.appendChild(sDiv);
-  });
-  if(sysSums.length){
-    // Recalculate grand totals fresh from scratch
-    var gNet=0,gVat=0;
-    var freshSums=systems.map(function(sys,si){
-      var t=0,tv=0;
-      sys.items.forEach(function(it){if(!it.isSummary){var c=calcItem(it);t+=c.net;tv+=c.vat;}});
-      sys.svcs.forEach(function(s){if(!s.isSummary){var n=Math.round((s.qty||1)*(s.price||0)*(1-(s.disc||0)/100)*100)/100;t+=n;tv+=Math.round(n*(s.vat||5)/100*100)/100;}});
-      t=Math.round(t*100)/100;tv=Math.round(tv*100)/100;
-      gNet+=t;gVat+=tv;
-      return{name:'System '+(si+1)+' — '+sys.name,total:t};
-    });
-    gNet=Math.round(gNet*100)/100;
-    gVat=Math.round(gVat*100)/100;
-
-    var comm=document.createElement('div');comm.className='doc-wrap';
-    var summaryVisible=getSec('summary');
-    var html='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-bottom:.5px solid var(--border);cursor:pointer" onclick="setSec(\'summary\',!getSec(\'summary\'));renderQuot()">'+
-      '<span style="font-weight:700;font-size:12px">💰 Commercial Summary</span>'+
-      '<span style="font-size:11px;color:var(--text2)">'+(summaryVisible?'▲ Hide':'▼ Show')+'</span>'+
-    '</div>';
-    if(summaryVisible){
-      html+='<div style="padding:14px">';
-      freshSums.forEach(function(s){html+='<div class="comm-row"><span>'+s.name+'</span><span style="font-weight:600">'+fmt(s.total)+'</span></div>';});
-      html+='<div class="comm-row" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><span>Subtotal (excl. VAT)</span><span style="font-weight:600">'+fmt(gNet)+'</span></div>';
-      // Discount row
-      var discPct=parseFloat(qtDiscPct)||0,discAmtIn=parseFloat(qtDiscAmt)||0;
-      var discApplied=discPct>0?Math.round(gNet*discPct/100*100)/100:Math.min(discAmtIn,gNet);
-      discApplied=Math.round(discApplied*100)/100;
-      var netAfterDisc=Math.round((gNet-discApplied)*100)/100;
-      var vatAfterDisc=Math.round(netAfterDisc*(gNet>0?(gVat/gNet):0)*100)/100;
-      if(getSec('commDisc')){
-        html+='<div class="comm-row" style="align-items:center">'+
-          '<span>Discount</span>'+
-          '<span style="display:flex;gap:5px;align-items:center">'+
-            '<input type="number" min="0" max="100" step="0.5" value="'+(discPct||'')+'" placeholder="%" style="width:50px;padding:3px 6px;border:.5px solid var(--border);border-radius:4px;font-size:11px;text-align:center" onchange="qtDiscPct=parseFloat(this.value)||0;qtDiscAmt=0;renderQuot()">'+
-            '<span style="font-size:10px;color:var(--text2)">or</span>'+
-            '<input type="number" min="0" step="0.01" value="'+(discAmtIn||'')+'" placeholder="AED" style="width:75px;padding:3px 6px;border:.5px solid var(--border);border-radius:4px;font-size:11px" onchange="qtDiscAmt=parseFloat(this.value)||0;qtDiscPct=0;renderQuot()">'+
-          '</span>'+
-        '</div>';
-      }
-      if(getSec('showVat'))html+='<div class="comm-row"><span>VAT @ 5%</span><span>'+fmt(vatAfterDisc)+'</span></div>';
-      html+='<div class="comm-grand"><span>GRAND TOTAL'+(getSec('showVat')?' (incl. VAT)':'')+'</span><span>'+fmt(netAfterDisc+(getSec('showVat')?vatAfterDisc:0))+'</span></div>';
-      html+='</div>';
-    }
-    comm.innerHTML=html;doc.appendChild(comm);
-  }
-}
+function nav(p){if(p==='quot-list')renderQuotList();}
+function showPage(p){nav(p);}
 
 function renderQuotList(q){
   var search=(q||gv('ql-search')||'').toLowerCase();
-  var statusFilter=gv('ql-status')||'';
+  var sf=gv('ql-status')||'';
   var wrap=document.getElementById('quot-list-wrap');if(!wrap)return;
-  var list=savedQuotations.slice().sort(function(a,b){return b.id-a.id;});
-  if(search)list=list.filter(function(qt){return(qt.num||'').toLowerCase().includes(search)||(qt.clientName||'').toLowerCase().includes(search)||(qt.projectRef||'').toLowerCase().includes(search);});
-  if(statusFilter)list=list.filter(function(qt){return qt.status===statusFilter;});
-  if(!list.length){wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">No quotations found.<br><br><button class="btn btn-p" onclick="newQuotation()">+ Create First Quotation</button></div>';return;}
-  var stColors={Approved:'#dcfce7','Under Discussion':'#fef3c7',Sent:'#e0f2fe',Rejected:'#fee2e2','On Hold':'#ede9fe',Cancelled:'#f1f5f9',Revised:'#f0fdf4'};
-  var stTxt={Approved:'#166534','Under Discussion':'#92400e',Sent:'#0369a1',Rejected:'#dc2626','On Hold':'#7c3aed',Cancelled:'#6b7280',Revised:'#166534'};
-  wrap.innerHTML='<table class="list-tbl">'+
-    '<colgroup><col style="width:130px"><col><col style="width:160px"><col style="width:100px"><col style="width:130px"><col style="width:110px"><col style="width:130px"></colgroup>'+
-    '<thead><tr><th>Quotation No.</th><th>Client</th><th>Project Ref</th><th class="td-nowrap">Date</th><th style="text-align:right">Total</th><th class="td-badge">Status</th><th class="td-act">Actions</th></tr></thead><tbody>'+
-    list.map(function(qt,i){
-      var c=clients.find(function(x){return x.id===qt.clientId;})||{name:qt.clientName||'—'};
-      var bg=stColors[qt.status]||'#f1f5f9';var tc=stTxt[qt.status]||'#374151';
-      return'<tr style="background:'+(i%2===0?'#fff':'#fafafa')+';cursor:pointer" onclick="loadQuotation('+qt.id+');nav(\'quot\')">'+
-        '<td class="td-num">'+escH(qt.num||'')+'</td>'+
-        '<td>'+escH(c.name)+'</td>'+
-        '<td style="color:var(--text2);font-size:11px">'+escH(qt.projectRef||'—')+'</td>'+
-        '<td class="td-nowrap" style="color:var(--text2)">'+escH(qt.date||'')+'</td>'+
-        '<td class="td-amt">AED '+fmtNum(qt.total||0)+'</td>'+
-        '<td class="td-badge"><span style="padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;white-space:nowrap;background:'+bg+';color:'+tc+'">'+escH(qt.status||'')+'</span></td>'+
-        '<td class="td-act" onclick="event.stopPropagation()">'+
-          '<div style="display:flex;gap:5px;justify-content:center">'+
-            '<button class="btn btn-xs" onclick="loadQuotation('+qt.id+');nav(\'quot\')">✏️ Open</button>'+
-            '<button class="btn btn-xs" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5" onclick="deleteQuotation('+qt.id+')">🗑</button>'+
-          '</div>'+
-        '</td>'+
-      '</tr>';
-    }).join('')+
-    '</tbody></table>';
+  var list=SBR.savedQuotations.slice().sort(function(a,b){return b.id-a.id;});
+  if(search)list=list.filter(function(qt){return(qt.num||'').toLowerCase().includes(search)||(clients.find(function(c){return c.id===qt.clientId;})||{name:''}).name.toLowerCase().includes(search);});
+  if(sf)list=list.filter(function(qt){return qt.status===sf;});
+  if(!list.length){wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">No quotations found. <button class="btn btn-p" onclick="newQuotation()">+ New Quotation</button></div>';return;}
+  var stC={Approved:'#dcfce7','Under Discussion':'#fef3c7',Sent:'#e0f2fe',Rejected:'#fee2e2','On Hold':'#ede9fe',Cancelled:'#f1f5f9'};
+  var stT={Approved:'#166534','Under Discussion':'#92400e',Sent:'#0369a1',Rejected:'#dc2626','On Hold':'#7c3aed',Cancelled:'#6b7280'};
+  wrap.innerHTML='<table class="list-tbl"><thead><tr><th>Quotation No.</th><th>Client</th><th>Project Ref</th><th class="td-nowrap">Date</th><th style="text-align:right">Total</th><th class="td-badge">Status</th><th class="td-act">Actions</th></tr></thead><tbody>'+
+  list.map(function(qt,i){
+    var c=clients.find(function(x){return x.id===qt.clientId;})||{name:qt.clientName||'—'};
+    var bg=stC[qt.status]||'#f1f5f9';var tc=stT[qt.status]||'#374151';
+    return'<tr style="background:'+(i%2===0?'#fff':'#fafafa')+'">' +
+      '<td class="td-num">'+escH(qt.num||'')+'</td>'+
+      '<td>'+escH(c.name)+'</td>'+
+      '<td style="font-size:11px;color:var(--text2)">'+escH(qt.projectRef||'—')+'</td>'+
+      '<td class="td-nowrap" style="font-size:11px">'+escH(qt.date||'—')+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:var(--blue)">AED '+fmtNum(qt.total||0)+'</td>'+
+      '<td class="td-badge"><span style="background:'+bg+';color:'+tc+';padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600">'+escH(qt.status||'—')+'</span></td>'+
+      '<td class="td-act" style="white-space:nowrap">'+
+        '<button class="btn btn-xs btn-p" onclick="editQuot('+qt.id+')" style="margin-right:4px">✏️ Edit</button>'+
+        '<button class="btn btn-xs" onclick="duplicateQt('+qt.id+')" style="margin-right:4px" title="Duplicate">⧉</button>'+
+        '<button class="btn btn-xs btn-r" onclick="deleteQt('+qt.id+')">✕</button>'+
+      '</td></tr>';
+  }).join('')+'</tbody></table>';
 }
 
-function saveQuotation(){
-  var num=gv('qt-number').trim();
-  if(!num){alert('Please enter a quotation number');return;}
-  if(!systems.length&&!qClient){alert('Add at least a client or a system before saving');return;}
-  // Duplicate number check
-  var dupQt=savedQuotations.find(function(q){return q.num===num&&q.id!==currentQtId;});
-  if(dupQt){alert('❌ Quotation number "'+num+'" already exists. Please use a different number.');return;}
-  var grand=0;
-  systems.forEach(function(sys){
-    sys.items.forEach(function(it){if(!it.isSummary){var c=calcItem(it);grand+=c.total;}});
-    sys.svcs.forEach(function(s){if(!s.isSummary){var sNet=Math.round((s.qty||1)*(s.price||0)*(1-(s.disc||0)/100)*100)/100;grand+=sNet+Math.round(sNet*(s.vat||5)/100*100)/100;}});
-  });
-  grand=Math.round(grand*100)/100;
-  var _qDiscPct=parseFloat(qtDiscPct)||0;
-  var _qDiscAmt=parseFloat(qtDiscAmt)||0;
-  var status=gv('qt-status');
-  var existing=currentQtId?savedQuotations.find(function(q){return q.id===currentQtId;}):null;
-  var groupId=existing?existing.groupId:quotGroupCtr++;
-  var version=existing?existing.version:1;
-  var qt={
-    id:currentQtId||qtIdCtr++,
-    groupId:groupId,
-    version:version,
-    num:num,date:gv('qt-date'),approvedDate:gv('qt-approved-date')||'',status:status,
-    projectRef:gv('qt-project-ref')||'',
-    paymentTerms:gv('qt-terms')||'',
-    coverLetter:JSON.parse(JSON.stringify(SBR_QT_COVER)),
-    customTnC:JSON.parse(JSON.stringify(SBR_TNC)),
-    clientId:qClient?qClient.id:null,
-    systems:JSON.parse(JSON.stringify(systems)),
-    total:grand,
-    discPct:_qDiscPct,discAmt:_qDiscAmt,
-    savedAt:new Date().toLocaleString('en-GB'),
-    projectId:existing?existing.projectId:null
-  };
-  if(currentQtId){
-    var idx=savedQuotations.findIndex(function(q){return q.id===currentQtId;});
-    if(idx>=0)savedQuotations[idx]=qt;
-  } else {
-    currentQtId=qt.id;
-    savedQuotations.push(qt);
-    qtIdCtr++;
-  }
-  // Auto-create project when Approved
-  if(status==='Approved'&&!qt.projectId){
-    autoCreateProject(qt);
-  }
-  // If status changed to Approved and project already exists, update project status
-  if(status==='Approved'&&qt.projectId){
-    var proj=projects.find(function(p){return p.id===qt.projectId;});
-    if(proj&&proj.status==='Quotation')proj.status='In Progress';
-  }
-  updateSavedQuotBar();
-  saveAllData();
-  showToast('✅ Quotation "'+num+'" saved!'+(status==='Approved'?' Project auto-created.':''));
+function editQuot(id){
+  var qt=SBR.savedQuotations.find(function(q){return q.id===id;});
+  if(!qt)return;
+  // Open in modal for now - full builder coming
+  openQtModal(qt);
 }
 
-function deleteQuotation(id){
-  var qt=savedQuotations.find(function(x){return x.id===id;});
-  if(!qt||!confirm('Delete quotation '+qt.num+'?\nThis cannot be undone.'))return;
-  savedQuotations=savedQuotations.filter(function(x){return x.id!==id;});
-  saveAllData();renderQuotList();updateSavedQuotBar();
-  showToast('Quotation deleted');
+function newQuotation(){
+  openQtModal(null);
 }
 
-function newVersionFromQuot(groupId){
-  // Find latest version in this group
-  var group=savedQuotations.filter(function(q){return q.groupId===groupId;});
-  if(!group.length)return;
-  group.sort(function(a,b){return b.version-a.version;});
-  var latest=group[0];
-  var newVersion=latest.version+1;
-  // Build new version number: if QT-2026-001 → QT-2026-001/v2
-  var baseNum=latest.num.split('/v')[0];
-  var newNum=baseNum+'/v'+newVersion;
-  // Load latest quotation into builder
-  currentQtId=null; // new entry
-  systems=JSON.parse(JSON.stringify(latest.systems));
-  qClient=latest.clientId?clients.find(function(c){return c.id===latest.clientId;}):null;
-  sv('qt-number',newNum);
-  sv('qt-date',td());
-  sv('qt-status','Under Discussion');
-  if(qClient){
-    document.getElementById('q-sel-wrap').style.display='none';
-    var card=document.getElementById('q-card');card.classList.add('show');
-    document.getElementById('q-av').textContent=initials(qClient.name);
-    document.getElementById('q-cname').textContent=qClient.name;
-    document.getElementById('q-cdetail').textContent=qClient.type+(qClient.addr?' · '+qClient.addr:'');
+function duplicateQt(id){
+  var qt=SBR.savedQuotations.find(function(q){return q.id===id;});
+  if(!qt)return;
+  var copy=JSON.parse(JSON.stringify(qt));
+  copy.id=SBR.qtIdCtr++;
+  copy.num='QT-'+new Date().getFullYear()+'-'+String(copy.id).padStart(3,'0');
+  copy.status='Estimate';copy.date=new Date().toISOString().split('T')[0];
+  SBR.savedQuotations.push(copy);
+  saveAllData();renderQuotList();showToast('✅ Duplicated: '+copy.num);
+}
+
+function deleteQt(id){
+  if(!confirm('Delete this quotation?'))return;
+  SBR.savedQuotations=SBR.savedQuotations.filter(function(q){return q.id!==id;});
+  saveAllData();renderQuotList();showToast('Deleted');
+}
+
+// Simple modal editor
+function openQtModal(qt){
+  var isNew=!qt;
+  if(isNew){qt={id:SBR.qtIdCtr++,num:'QT-'+new Date().getFullYear()+'-'+String(SBR.qtIdCtr).padStart(3,'0'),date:new Date().toISOString().split('T')[0],status:'Estimate',clientId:null,systems:[{id:1,name:'System 1',items:[],svcs:[]}],total:0};}
+  var modal=document.getElementById('qt-modal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='qt-modal';
+    modal.className='modal-bg';modal.style.display='none';
+    modal.onclick=function(e){if(e.target===modal)modal.style.display='none';};
+    modal.innerHTML='<div class="modal" style="max-width:900px;max-height:90vh;overflow-y:auto"><div id="qt-modal-inner"></div></div>';
+    document.body.appendChild(modal);
   }
-  renderQuot();
-  nav('quot');
-  // Store the group info temporarily so saveQuotation can pick it up
-  pendingVersionGroupId=groupId;
-  pendingVersionNum=newVersion;
-  showToast('📄 New version '+newNum+' ready to edit. Make changes and click Save.');
-}
-
-function updateSavedQuotBar(){
-  var count=savedQuotations.length;
-  var badge=document.getElementById('saved-quot-count-badge');
-  if(badge)badge.textContent=count;
-  var list=document.getElementById('saved-quot-list');
-  var empty=document.getElementById('saved-quot-empty');
-  if(!list)return;
-  var chips=list.querySelectorAll('.qt-chip');
-  chips.forEach(function(c){c.remove();});
-  if(!count){if(empty)empty.style.display='';return;}
-  if(empty)empty.style.display='none';
-  // Group quotations by groupId
-  var groups={};
-  savedQuotations.forEach(function(qt){
-    if(!groups[qt.groupId])groups[qt.groupId]=[];
-    groups[qt.groupId].push(qt);
-  });
-  Object.keys(groups).reverse().forEach(function(gid){
-    var grp=groups[gid].slice().sort(function(a,b){return b.version-a.version;});
-    var latest=grp[0];
-    var c=latest.clientId?clients.find(function(x){return x.id===latest.clientId;}):null;
-    var isActive=grp.some(function(q){return q.id===currentQtId;});
-    var chip=document.createElement('div');
-    chip.className='qt-chip';
-    chip.style.cssText='display:inline-flex;flex-direction:column;padding:6px 10px;border:.5px solid '+(isActive?'var(--blue)':'var(--border2)')+';border-radius:6px;background:'+(isActive?'var(--blue-lt)':'var(--surface)')+';cursor:pointer;min-width:160px;max-width:240px';
-    // Latest version info
-    var approvedVer=grp.find(function(q){return q.status==='Approved';});
-    chip.innerHTML=
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px">'+
-        '<span style="font-size:11px;font-weight:700;color:'+(isActive?'var(--blue)':'var(--text)')+'">'+latest.num+'</span>'+
-        (approvedVer?'<span class="badge b-active" style="font-size:9px">✅ Approved</span>':'<span class="badge b-draft" style="font-size:9px">'+latest.status+'</span>')+
+  var clientOpts=SBR.clients.map(function(c){return'<option value="'+c.id+'"'+(c.id===qt.clientId?' selected':'')+'>'+escH(c.name)+'</option>';}).join('');
+  var systemsHtml=qt.systems.map(function(sys,si){
+    var itemsHtml=sys.items.map(function(item,ii){
+      return'<div style="display:grid;grid-template-columns:40px 1fr 80px 80px 60px 30px;gap:6px;align-items:center;padding:4px 0;border-bottom:.5px solid #f0f0f0">'+
+        '<span style="font-size:11px;color:var(--text2)">'+escH(item.num||'')+'</span>'+
+        '<span style="font-size:12px">'+escH(item.name||'')+'</span>'+
+        '<span style="font-size:11px;text-align:right">'+fmtNum(item.price||0)+'</span>'+
+        '<span style="font-size:11px;text-align:center">×'+escH(String(item.qty||1))+'</span>'+
+        '<span style="font-size:11px;text-align:center">'+escH(String(item.vat||5))+'%</span>'+
+        '<button onclick="removeQtItem('+si+','+ii+')" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px">✕</button>'+
+      '</div>';
+    }).join('');
+    var svcsHtml=sys.svcs.map(function(svc,svi){
+      return'<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">'+
+        '<span style="flex:1">'+escH(svc.name||'')+'</span>'+
+        '<span>AED '+fmtNum(svc.price||0)+'</span>'+
+        '<button onclick="removeQtSvc('+si+','+svi+')" style="background:none;border:none;cursor:pointer;color:#dc2626">✕</button>'+
+      '</div>';
+    }).join('');
+    return'<div style="border:.5px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+        '<input value="'+escH(sys.name||'')+'" onchange="window._qtEdit.systems['+si+'].name=this.value" style="flex:1;border:none;background:transparent;font-weight:700;font-size:13px;outline:none">'+
+        (qt.systems.length>1?'<button onclick="removeQtSys('+si+')" style="background:none;border:none;cursor:pointer;color:#dc2626">✕ Remove</button>':'')+'</div>'+
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:4px">Products:</div>'+
+      '<div id="qt-items-'+si+'">'+itemsHtml+'</div>'+
+      '<div style="font-size:11px;color:var(--text2);margin:8px 0 4px">Services:</div>'+
+      '<div id="qt-svcs-'+si+'">'+svcsHtml+'</div>'+
+      '<div style="display:flex;gap:6px;margin-top:8px">'+
+        '<button class="btn btn-xs" onclick="addQtItemManual('+si+')">+ Add Item</button>'+
+        '<button class="btn btn-xs" onclick="addQtSvcManual('+si+')">+ Add Service</button>'+
       '</div>'+
-      '<div style="font-size:10px;color:var(--text2)">'+(c?c.name:'No client')+'</div>'+
-      '<div style="font-size:10px;color:var(--blue);font-weight:600">'+fmt(latest.total)+'</div>'+
-      (grp.length>1?'<div style="font-size:9px;color:var(--text3);margin-top:2px">'+grp.length+' versions</div>':'')+
-      '<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">'+
-        '<button class="btn btn-xs" onclick="event.stopPropagation();loadQuotation('+latest.id+')" style="font-size:9px;flex:1">Load</button>'+
-        '<button class="btn btn-xs" onclick="event.stopPropagation();newVersionFromQuot('+gid+')" style="font-size:9px;flex:1;background:var(--purple-lt);color:var(--purple);border-color:#d8b4fe">+Version</button>'+
-        '<button class="btn btn-xs btn-r" onclick="event.stopPropagation();deleteQuotGroup('+gid+')" style="font-size:9px" title="Delete all versions">✕</button>'+
-      '</div>';
-    if(grp.length>1){
-      chip.innerHTML+='<div style="margin-top:5px;border-top:.5px solid var(--border);padding-top:5px">'+ 
-        grp.map(function(q){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0;cursor:pointer" onclick="event.stopPropagation();loadQuotation('+q.id+')">'+
-          '<span style="font-size:10px;color:'+(q.id===currentQtId?'var(--blue)':'var(--text2)')+'">v'+q.version+' — '+q.num+'</span>'+
-          '<span class="badge '+(q.status==='Approved'?'b-active':q.status==='Sent'?'b-sent':q.status==='Rejected'?'b-overdue':'b-draft')+'" style="font-size:9px">'+q.status+'</span>'+
-        '</div>';}).join('')+
-      '</div>';
-    }
-    chip.onclick=function(e){if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='SPAN')loadQuotation(latest.id);};
-    list.appendChild(chip);
-  });
-}
-
-function deleteQuotGroup(groupId){
-  var grp=savedQuotations.filter(function(q){return q.groupId===groupId;});
-  if(!confirm('Delete all '+grp.length+' version(s) in this quotation group?'))return;
-  savedQuotations=savedQuotations.filter(function(q){return q.groupId!==groupId;});
-  if(grp.some(function(q){return q.id===currentQtId;}))currentQtId=null;
-  updateSavedQuotBar();saveAllData();
-}
-
-function renderQuotDebounced(){clearTimeout(_renderQuotTimer);_renderQuotTimer=setTimeout(renderQuot,1200);}
-
-function selectQClient(id){
-  qClient=clients.find(function(c){return c.id===id;});
-  document.getElementById('q-dd').classList.remove('open');sv('q-inp','');
-  document.getElementById('q-sel-wrap').style.display='none';
-  var card=document.getElementById('q-card');card.classList.add('show');
-  document.getElementById('q-av').textContent=initials(qClient.name);
-  document.getElementById('q-cname').textContent=qClient.name;
-  document.getElementById('q-cdetail').textContent=qClient.type+(qClient.addr?' · '+qClient.addr:'');
-  var ph=(qClient.phones[0]||{}).number||'';var em=(qClient.persons[0]||{}).email||'';
-  document.getElementById('q-ccontact').innerHTML=(ph?'📞 '+ph+'<br>':'')+(em?'✉ '+em:'');
-  updateQProjRef();
-  renderQuot();
-}
-
-function clearQClient(){qClient=null;document.getElementById('q-sel-wrap').style.display='';document.getElementById('q-card').classList.remove('show');renderQuot();}
-
-function addSystem(){
-  try{
-    var n=systems.length+1;
-    systems.push({id:sysCtr++,name:'NEW SYSTEM — click to rename',collapsed:false,scope:'Scope of work for System '+n+' as per design drawings and client requirements.',items:[],svcs:[]});
-    renderQuot();
-  }catch(e){alert('addSystem error: '+e.message+'\n'+e.stack);}
-}
-
-function removeSystem(si){if(confirm('Remove System '+(si+1)+'?')){systems.splice(si,1);renderQuot();}}
-
-function renum(si){systems[si].items.forEach(function(it,idx){it.num=(si+1)+'.'+(idx+1);});}
-
-function removeItem(si,ii){var n=systems[si].items[ii].num;systems[si].svcs=systems[si].svcs.filter(function(s){return s.fromItem!==n;});systems[si].items.splice(ii,1);renum(si);renderQuot();}
-
-function hideItem(si,ii){systems[si].items[ii].hidden=!systems[si].items[ii].hidden;renderQuot();}
-
-function openSvcPicker(si){
-  svcPickerSysIdx=si;
-  var el=document.getElementById('svc-picker-search');
-  if(el)el.value='';
-  renderSvcPicker();
-  document.getElementById('svc-picker-modal').classList.add('open');
-}
-
-function renderSvcPicker(){
-  var q=(document.getElementById('svc-picker-search').value||'').toLowerCase();
-  var list=services.filter(function(s){
-    return !q||s.name.toLowerCase().includes(q)||(s.cat||'').toLowerCase().includes(q);
-  });
-  var wrap=document.getElementById('svc-picker-list');wrap.innerHTML='';
-  if(!list.length){
-    wrap.innerHTML='<div style="padding:14px;text-align:center;font-size:11px;color:var(--text2)">'+
-      (services.length?'No services match your search.':'No services in database yet. Go to <b>Services</b> page to add some, or use the custom service below.')+
     '</div>';
-    return;
-  }
-  list.forEach(function(s){
-    var row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;border:.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);transition:background .15s';
-    row.onmouseover=function(){this.style.background='var(--blue-lt)';};
-    row.onmouseout=function(){this.style.background='var(--surface)';};
-    row.innerHTML=
-      '<div style="width:32px;height:32px;border-radius:6px;background:var(--teal-lt,#f0fdfa);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔧</div>'+
-      '<div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.name+'</div>'+
-        '<div style="font-size:10px;color:var(--text2)">'+(s.cat?s.cat+' · ':'')+s.unit+'</div>'+
-        (s.desc?'<div style="font-size:10px;color:var(--text3)">'+s.desc+'</div>':'')+
-      '</div>'+
-      '<div style="text-align:right;flex-shrink:0">'+
-        '<div style="font-size:12px;font-weight:600;color:var(--blue)">'+fmt(s.price)+'</div>'+
-        '<div style="font-size:10px;color:var(--text2)">× '+(s.defQty||1)+'</div>'+
-      '</div>';
-    row.onclick=function(){addSvcFromDB(s);};
-    wrap.appendChild(row);
+  }).join('');
+
+  window._qtEdit=JSON.parse(JSON.stringify(qt));
+  window._qtIsNew=isNew;
+
+  document.getElementById('qt-modal-inner').innerHTML=
+    '<div class="modal-hdr"><div class="modal-title">'+(isNew?'+ New Quotation':'✏️ Edit: '+escH(qt.num||''))+'</div>'+
+    '<button onclick="document.getElementById('qt-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div>'+
+    '<div class="fg2">'+
+      '<div class="field"><label class="flbl">Quotation No.</label><input class="fi" id="qf-num" value="'+escH(qt.num||'')+'"></div>'+
+      '<div class="field"><label class="flbl">Date</label><input class="fi" id="qf-date" type="date" value="'+escH(qt.date||'')+'"></div>'+
+    '</div><div class="fg2">'+
+      '<div class="field"><label class="flbl">Client *</label><select class="fi" id="qf-client"><option value="">— Select —</option>'+clientOpts+'</select></div>'+
+      '<div class="field"><label class="flbl">Status</label><select class="fi" id="qf-status"><option>Estimate</option><option>Sent</option><option>Under Discussion</option><option>Approved</option><option>Rejected</option><option>On Hold</option></select></div>'+
+    '</div><div class="field"><label class="flbl">Project Ref</label><input class="fi" id="qf-projref" value="'+escH(qt.projectRef||'')+'"></div>'+
+    '<div style="margin:12px 0 6px;font-weight:700">Systems</div>'+
+    '<div id="qt-systems">'+systemsHtml+'</div>'+
+    '<button class="btn" onclick="addQtSys()">+ Add System</button>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'+
+      '<button class="btn" onclick="document.getElementById('qt-modal').style.display='none'">Cancel</button>'+
+      (!isNew?'<button class="btn btn-r" onclick="deleteQt('+qt.id+');document.getElementById('qt-modal').style.display='none'">🗑️ Delete</button>':'')+
+      '<button class="btn btn-p" onclick="saveQtModal()">💾 Save</button>'+
+    '</div>';
+  
+  sv('qf-status', qt.status||'Estimate');
+  modal.style.display='flex';
+}
+
+function addQtSys(){
+  var id=Date.now();
+  window._qtEdit.systems.push({id:id,name:'New System',items:[],svcs:[]});
+  openQtModal(window._qtEdit);
+}
+function removeQtSys(si){window._qtEdit.systems.splice(si,1);openQtModal(window._qtEdit);}
+function addQtItemManual(si){
+  var name=prompt('Item name:');if(!name)return;
+  var price=parseFloat(prompt('Price (AED):','0')||0);
+  var qty=parseInt(prompt('Qty:','1')||1);
+  var items=window._qtEdit.systems[si].items;
+  items.push({id:Date.now(),num:(si+1)+'.'+(items.length+1),name:name,qty:qty,price:price,disc:0,vat:5});
+  openQtModal(window._qtEdit);
+}
+function removeQtItem(si,ii){window._qtEdit.systems[si].items.splice(ii,1);openQtModal(window._qtEdit);}
+function addQtSvcManual(si){
+  var name=prompt('Service name:');if(!name)return;
+  var price=parseFloat(prompt('Price (AED):','0')||0);
+  var qty=parseInt(prompt('Qty:','1')||1);
+  window._qtEdit.systems[si].svcs.push({name:name,qty:qty,price:price});
+  openQtModal(window._qtEdit);
+}
+function removeQtSvc(si,svi){window._qtEdit.systems[si].svcs.splice(svi,1);openQtModal(window._qtEdit);}
+
+function saveQtModal(){
+  var clientId=parseInt(gv('qf-client'));
+  if(!clientId){showToast('Please select a client','error');return;}
+  window._qtEdit.num=gv('qf-num');
+  window._qtEdit.date=gv('qf-date');
+  window._qtEdit.clientId=clientId;
+  window._qtEdit.status=gv('qf-status');
+  window._qtEdit.projectRef=gv('qf-projref');
+  // Calc total
+  var total=0;
+  window._qtEdit.systems.forEach(function(sys){
+    sys.items.forEach(function(item){total+=(item.qty||1)*(item.price||0)*(1+(parseFloat(item.vat||5)/100));});
+    sys.svcs.forEach(function(svc){total+=(svc.qty||1)*(svc.price||0)*1.05;});
   });
+  window._qtEdit.total=Math.round(total*100)/100;
+  window._qtEdit.savedAt=new Date().toISOString();
+  if(window._qtIsNew){SBR.savedQuotations.push(window._qtEdit);}
+  else{var idx=SBR.savedQuotations.findIndex(function(q){return q.id===window._qtEdit.id;});if(idx>=0)SBR.savedQuotations[idx]=window._qtEdit;}
+  saveAllData();
+  document.getElementById('qt-modal').style.display='none';
+  renderQuotList();showToast('✅ Quotation saved!');
 }
 
-function addSvcFromDB(s){
-  if(svcPickerSysIdx<0)return;
-  var si=svcPickerSysIdx;
-  // Check if same service already exists in this system
-  var existing=systems[si].svcs.find(function(sv){
-    return sv.svcId===s.id||(sv.name===s.name);
-  });
-  if(existing){
-    existing.qty+=1;
-    renderQuot();
-    document.getElementById('svc-picker-modal').classList.remove('open');
-    showToast('✅ '+s.name+' — qty increased to '+existing.qty);
-    return;
-  }
-  // New service
-  systems[si].svcs.push({
-    name:s.name,
-    qty:s.defQty||1,
-    price:s.price||0,
-    fromItem:'manual',
-    svcId:s.id
-  });
-  renderQuot();
-  document.getElementById('svc-picker-modal').classList.remove('open');
-  showToast('✅ '+s.name+' added to system');
+async function main(){
+  await initPage('quotations','Quotations',function(){renderQuotList();});
 }
-
-function addManualSvc(si){
-  systems[si].svcs.push({name:'Service',qty:1,price:0,fromItem:'manual'});
-  renderQuot();
-}
-
-function removeSvc(si,svi){systems[si].svcs.splice(svi,1);renderQuot();}
-
-function openPM(si){
-  modalSys=si;
-  document.getElementById('pm-title').textContent='Add Item — System '+(si+1);
-  sv('pm-search','');sv('pm-cat','');['ci-name','ci-model','ci-desc'].forEach(function(i){sv(i,'');});sv('ci-qty','1');sv('ci-price','0');sv('ci-disc','0');
-  renderPL();document.getElementById('prod-modal').classList.add('open');
-}
-
-function closePM(){document.getElementById('prod-modal').classList.remove('open');}
-
-// ── PAGE INIT ────────────────────────────────────────
-async function main() {
-  await initPage('quotations', 'Quotations', function() {
-    renderQuotList();
-  });
-}
-
-window.addEventListener('load', async function() { await main(); });
+window.addEventListener('load',async function(){await main();});
 </script>
 </body>
 </html>
