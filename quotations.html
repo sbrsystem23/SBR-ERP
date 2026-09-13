@@ -396,6 +396,15 @@
 
 <script src="shared.js"></script>
 <script>
+// ── MISSING HELPERS FROM OLD ERP ────────────────────
+window.fmtNum = function(n, d) { return Number(n||0).toLocaleString('en-AE', {minimumFractionDigits:d||2, maximumFractionDigits:d||2}); };
+window.fmtDate = function(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;} };
+window.fmtDateShort = function(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short'});}catch(e){return d;} };
+window.populateCatSelect = function(id, cat, val) { var sel=document.getElementById(id);if(!sel)return;var opts=SBR.cats&&SBR.cats[cat]?SBR.cats[cat]:[];sel.innerHTML=opts.map(function(o){var v=typeof o==='object'?o.name:o;return'<option value="'+v+'"'+(v==val?' selected':'')+'>'+v+'</option>';}).join(''); };
+window.refreshStatusSelects = function() {};
+window.showToast = window.showToast || function(msg){console.log(msg);};
+window.colState = window.colState || {};
+
 // ── VARIABLE ALIASES (old ERP -> cloud ERP) ──────────
 // These make old ERP JS work with cloud ERP data
 Object.defineProperties(window, {
