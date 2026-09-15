@@ -2,7 +2,7 @@
 // SBR ERP — SHARED CORE v2
 // ═══════════════════════════════════════════════════
 
-const SHEET_URL = '/.netlify/functions/sheet';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwF01VM_NXs7WiBznpfkZoTDUzwQihm9gZQH7qkavY1SPPA9CykIrXO-7ZyR68uQZ1_/exec';
 const APP_VERSION = 'v2026-cloud-1.0';
 
 // ── AUTH ──────────────────────────────────────────
@@ -138,35 +138,62 @@ function setSyncStatus(status, msg) {
 
 async function _pushToSheet() {
   const data = collectData();
+  const json = JSON.stringify(data);
   try {
     await fetch(SHEET_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'save', data: JSON.stringify(data) }),
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'save', data: json }),
     });
-    setSyncStatus('saved', '✅ Saved ' + new Date().toLocaleTimeString('en-AE',{hour:'2-digit',minute:'2-digit'}));
-  } catch(e) {
+    setSyncStatus('saved', '✅ Saved ' + new Date().toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit' }));
+  } catch (e) {
     setSyncStatus('error', '❌ Save failed');
   }
 }
 
 async function loadFromSheet() {
   setSyncStatus('loading');
-  try {
-    const res = await fetch(SHEET_URL + '?action=load&t=' + Date.now());
-    const json = await res.json();
-    if (json.status === 'ok' && json.data) {
-      const d = typeof json.data === 'string' ? JSON.parse(json.data) : json.data;
-      applyData(d);
-      setSyncStatus('saved', '✅ Synced');
-      return true;
-    }
-    setSyncStatus('idle', '☁️ Ready');
-    return false;
-  } catch(e) {
-    setSyncStatus('error', '❌ ' + e.message);
-    return false;
-  }
+  return new Promise((resolve) => {
+    const cbName = '_sbrCb_' + Date.now();
+    const url = SHEET_URL + '?action=load&callback=' + cbName + '&t=' + Date.now();
+    let done = false;
+
+    window[cbName] = function(json) {
+      done = true;
+      delete window[cbName];
+      const s = document.getElementById('_sbr_jsonp_');
+      if (s) s.remove();
+      if (json && json.status === 'ok' && json.data) {
+        const d = typeof json.data === 'string' ? JSON.parse(json.data) : json.data;
+        applyData(d);
+        setSyncStatus('saved', '✅ Synced');
+        resolve(true);
+      } else {
+        setSyncStatus('idle', '☁️ Ready');
+        resolve(false);
+      }
+    };
+
+    const script = document.createElement('script');
+    script.id = '_sbr_jsonp_';
+    script.src = url;
+    script.onerror = () => {
+      if (done) return; done = true;
+      delete window[cbName]; script.remove();
+      setSyncStatus('error', '❌ Load failed');
+      resolve(false);
+    };
+    setTimeout(() => {
+      if (done) return; done = true;
+      delete window[cbName];
+      const el = document.getElementById('_sbr_jsonp_');
+      if (el) el.remove();
+      setSyncStatus('error', '❌ Timeout');
+      resolve(false);
+    }, 20000);
+
+    document.head.appendChild(script);
+  });
 }
 
 // ── EXPORT / IMPORT ──────────────────────────────
@@ -201,6 +228,13 @@ function openImport() {
 }
 
 // ── UTILITIES ────────────────────────────────────
+// Aliases for old ERP compatibility
+function fmtNum(n, d) { return Number(n||0).toLocaleString('en-AE', {minimumFractionDigits:d||2, maximumFractionDigits:d||2}); }
+function fmtDate(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;} }
+function fmtDateShort(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-AE',{day:'numeric',month:'short'});}catch(e){return d;} }
+function populateCatSelect(id,cat,val) { var sel=document.getElementById(id);if(!sel)return;var opts=SBR.cats&&SBR.cats[cat]?SBR.cats[cat]:[];sel.innerHTML=opts.map(function(o){var v=typeof o==='object'?o.name:o;return'<option value="'+v+'"'+(v==val?' selected':'')+'>'+v+'</option>';}).join(''); }
+function refreshStatusSelects() {}
+var colState = {};
 function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmt(n) { return Number(n||0).toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function td() { return new Date().toISOString().split('T')[0]; }
