@@ -154,7 +154,7 @@ async function _pushToSheet() {
 async function loadFromSheet() {
   setSyncStatus('loading');
   return new Promise((resolve) => {
-    const cbName = '_sbrCb_' + Date.now();
+    const cbName = '_sbrLoad_' + Date.now();
     const url = SHEET_URL + '?action=load&callback=' + cbName + '&t=' + Date.now();
     let done = false;
 
@@ -177,26 +177,28 @@ async function loadFromSheet() {
     const script = document.createElement('script');
     script.id = '_sbr_jsonp_';
     script.src = url;
-    script.onerror = () => {
-      if (done) return; done = true;
-      delete window[cbName]; script.remove();
+    script.onerror = function() {
+      if (done) return;
+      done = true;
+      delete window[cbName];
+      script.remove();
       setSyncStatus('error', '❌ Load failed');
       resolve(false);
     };
-    setTimeout(() => {
-      if (done) return; done = true;
+    setTimeout(function() {
+      if (done) return;
+      done = true;
       delete window[cbName];
       const el = document.getElementById('_sbr_jsonp_');
       if (el) el.remove();
       setSyncStatus('error', '❌ Timeout');
       resolve(false);
-    }, 20000);
+    }, 25000);
 
     document.head.appendChild(script);
   });
 }
 
-// ── EXPORT / IMPORT ──────────────────────────────
 function exportData() {
   const data = collectData();
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
